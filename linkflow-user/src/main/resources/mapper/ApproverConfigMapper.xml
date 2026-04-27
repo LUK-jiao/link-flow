@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkFlow.user.mapper.ApproverConfigMapper">
+  <resultMap id="BaseResultMap" type="com.linkFlow.user.model.ApproverConfig">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="campaign_type" jdbcType="VARCHAR" property="campaignType" />
+    <result column="approver_id" jdbcType="BIGINT" property="approverId" />
+    <result column="approver_level" jdbcType="INTEGER" property="approverLevel" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from short_link_db..approver_config
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.linkFlow.user.model.ApproverConfig">
+    insert into short_link_db..approver_config (id, campaign_type, approver_id, 
+      approver_level, create_time, update_time
+      )
+    values (#{id,jdbcType=BIGINT}, #{campaignType,jdbcType=VARCHAR}, #{approverId,jdbcType=BIGINT}, 
+      #{approverLevel,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.linkFlow.user.model.ApproverConfig">
+    update short_link_db..approver_config
+    set campaign_type = #{campaignType,jdbcType=VARCHAR},
+      approver_id = #{approverId,jdbcType=BIGINT},
+      approver_level = #{approverLevel,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select id, campaign_type, approver_id, approver_level, create_time, update_time
+    from short_link_db..approver_config
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, campaign_type, approver_id, approver_level, create_time, update_time
+    from short_link_db..approver_config
+  </select>
+</mapper>

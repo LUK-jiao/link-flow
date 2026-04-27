@@ -20,6 +20,7 @@
         <module>linkflow-campaign</module>
         <module>linkflow-workflow</module>
         <module>linkflow-user</module>
+        <module>linkflow-mbg</module>
     </modules>
 
     <!-- 版本管理（所有子模块继承） -->
@@ -29,7 +30,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Spring 版本 -->
-        <spring-boot.version>3.2.5</spring-boot.version>
+        <spring-boot.version>3.4.2</spring-boot.version>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
         <!-- Flowable 版本 -->
         <flowable.version>7.0.1</flowable.version>
