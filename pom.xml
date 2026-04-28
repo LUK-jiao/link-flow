@@ -15,6 +15,7 @@
 
     <!-- 子模块列表 -->
     <modules>
+        <module>linkflow-api</module>
         <module>linkflow-common</module>
         <module>linkflow-gateway</module>
         <module>linkflow-campaign</module>
@@ -35,6 +36,9 @@
         <!-- Flowable 版本 -->
         <flowable.version>7.0.1</flowable.version>
         <mybatis-spring-boot-starter.version>3.0.3</mybatis-spring-boot-starter.version>
+        <!-- Dubbo & Nacos 版本 -->
+        <dubbo.version>3.2.0</dubbo.version>
+        <nacos.version>2.3.0</nacos.version>
     </properties>
 
     <!-- 依赖管理（子模块继承版本，不需要写 version） -->
@@ -65,7 +69,35 @@
                 <version>${flowable.version}</version>
             </dependency>
 
+            <!-- Dubbo -->
+            <dependency>
+                <groupId>org.apache.dubbo</groupId>
+                <artifactId>dubbo-bom</artifactId>
+                <version>${dubbo.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Dubbo Spring Boot Starter -->
+            <dependency>
+                <groupId>org.apache.dubbo</groupId>
+                <artifactId>dubbo-spring-boot-starter</artifactId>
+                <version>${dubbo.version}</version>
+            </dependency>
+
+            <!-- Nacos 注册中心 -->
+            <dependency>
+                <groupId>org.apache.dubbo</groupId>
+                <artifactId>dubbo-registry-nacos</artifactId>
+                <version>${dubbo.version}</version>
+            </dependency>
+
             <!-- 内部模块依赖 -->
+            <dependency>
+                <groupId>com.linkflow</groupId>
+                <artifactId>linkflow-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.linkflow</groupId>
                 <artifactId>linkflow-common</artifactId>
