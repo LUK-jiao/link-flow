@@ -34,6 +34,7 @@
         <spring-cloud.version>2023.0.1</spring-cloud.version>
         <!-- Flowable 版本 -->
         <flowable.version>7.0.1</flowable.version>
+        <mybatis-spring-boot-starter.version>3.0.3</mybatis-spring-boot-starter.version>
     </properties>
 
     <!-- 依赖管理（子模块继承版本，不需要写 version） -->
@@ -69,6 +70,12 @@
                 <groupId>com.linkflow</groupId>
                 <artifactId>linkflow-common</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <!-- MyBatis -->
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot-starter.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

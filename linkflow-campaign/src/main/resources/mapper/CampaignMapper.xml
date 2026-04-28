@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.linkFlow.campaign.mapper.CampaignMapper">
+  <resultMap id="BaseResultMap" type="com.linkFlow.campaign.model.Campaign">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="campaign_type" jdbcType="VARCHAR" property="campaignType" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="creator_user_id" jdbcType="BIGINT" property="creatorUserId" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="budget" jdbcType="DECIMAL" property="budget" />
+    <result column="reject_reason" jdbcType="VARCHAR" property="rejectReason" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from short_link_db..campaign
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.linkFlow.campaign.model.Campaign">
+    insert into short_link_db..campaign (id, name, description, 
+      campaign_type, status, creator_user_id, 
+      start_time, end_time, budget, 
+      reject_reason, create_time, update_time
+      )
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, 
+      #{campaignType,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{creatorUserId,jdbcType=BIGINT}, 
+      #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{budget,jdbcType=DECIMAL}, 
+      #{rejectReason,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.linkFlow.campaign.model.Campaign">
+    update short_link_db..campaign
+    set name = #{name,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      campaign_type = #{campaignType,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      creator_user_id = #{creatorUserId,jdbcType=BIGINT},
+      start_time = #{startTime,jdbcType=TIMESTAMP},
+      end_time = #{endTime,jdbcType=TIMESTAMP},
+      budget = #{budget,jdbcType=DECIMAL},
+      reject_reason = #{rejectReason,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select id, name, description, campaign_type, status, creator_user_id, start_time, 
+    end_time, budget, reject_reason, create_time, update_time
+    from short_link_db..campaign
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select id, name, description, campaign_type, status, creator_user_id, start_time, 
+    end_time, budget, reject_reason, create_time, update_time
+    from short_link_db..campaign
+  </select>
+</mapper>

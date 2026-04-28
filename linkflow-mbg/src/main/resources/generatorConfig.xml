@@ -12,10 +12,9 @@
                         connectionURL="jdbc:mysql://localhost:3306/short_link_db"
                         userId="root"
                         password="123456"/>
-        <javaModelGenerator targetPackage="com.linkFlow.user.model" targetProject="linkflow-user/src/main/java"/>
-        <sqlMapGenerator targetPackage="mapper" targetProject="linkflow-user/src/main/resources"/>
-        <javaClientGenerator type="XMLMAPPER" targetPackage="com.linkFlow.user.mapper" targetProject="linkflow-user/src/main/java"/>
-
-        <table tableName="approver_config" domainObjectName="ApproverConfig" catalog="short_link_db"/>
+        <javaModelGenerator targetPackage="com.linkFlow.workflow.model" targetProject="linkflow-workflow/src/main/java"/>
+        <sqlMapGenerator targetPackage="mapper" targetProject="linkflow-workflow/src/main/resources"/>
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.linkFlow.workflow.mapper" targetProject="linkflow-workflow/src/main/java"/>
+        <table tableName="approval_record" domainObjectName="ApprovalRecord" catalog="short_link_db"/>
     </context>
 </generatorConfiguration>
