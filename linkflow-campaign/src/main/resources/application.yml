@@ -1,23 +1,23 @@
 server:
-  port: 8084
+  port: 8081
 
 spring:
   application:
-    name: linkflow-user
+    name: linkflow-campaign
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/linkflow_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.linkFlow.user.model
+  type-aliases-package: com.linkFlow.campaign.model
 
 # Dubbo 配置
 dubbo:
   application:
-    name: linkflow-user
+    name: linkflow-campaign
     qos-enable: false
   registry:
     address: nacos://localhost:8848
@@ -25,6 +25,6 @@ dubbo:
       namespace: linkflow
   protocol:
     name: dubbo
-    port: 20884
+    port: 20881
   scan:
-    base-packages: com.linkFlow.user.service
+    base-packages: com.linkFlow.campaign.service
