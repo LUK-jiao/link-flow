@@ -12,7 +12,7 @@ spring:
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.linkFlow.user.model
+  type-aliases-package: com.linkflow.user.model
 
 # Dubbo 配置
 dubbo:
@@ -27,4 +27,4 @@ dubbo:
     name: dubbo
     port: 20884
   scan:
-    base-packages: com.linkFlow.user.service
+    base-packages: com.linkflow.user.service

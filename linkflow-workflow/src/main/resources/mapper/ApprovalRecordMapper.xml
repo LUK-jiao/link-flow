@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.linkFlow.workflow.mapper.ApprovalRecordMapper">
-  <resultMap id="BaseResultMap" type="com.linkFlow.workflow.model.ApprovalRecord">
+<mapper namespace="com.linkflow.workflow.mapper.ApprovalRecordMapper">
+  <resultMap id="BaseResultMap" type="com.linkflow.workflow.model.ApprovalRecord">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="campaign_id" jdbcType="BIGINT" property="campaignId" />
     <result column="workflow_instance_id" jdbcType="BIGINT" property="workflowInstanceId" />
@@ -18,7 +18,7 @@
     delete from short_link_db..approval_record
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.linkFlow.workflow.model.ApprovalRecord">
+  <insert id="insert" parameterType="com.linkflow.workflow.model.ApprovalRecord">
     insert into short_link_db..approval_record (id, campaign_id, workflow_instance_id, 
       task_id, task_name, approver_id, 
       approver_name, action, comment, 
@@ -28,7 +28,7 @@
       #{approverName,jdbcType=VARCHAR}, #{action,jdbcType=VARCHAR}, #{comment,jdbcType=VARCHAR}, 
       #{approveTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP})
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.linkFlow.workflow.model.ApprovalRecord">
+  <update id="updateByPrimaryKey" parameterType="com.linkflow.workflow.model.ApprovalRecord">
     update short_link_db..approval_record
     set campaign_id = #{campaignId,jdbcType=BIGINT},
       workflow_instance_id = #{workflowInstanceId,jdbcType=BIGINT},
