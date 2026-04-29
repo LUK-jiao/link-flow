@@ -11,6 +11,7 @@ import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * Campaign Dubbo 服务实现
  */
 @DubboService
+@Service
 public class CampaignServiceImpl implements CampaignApi {
 
     @Autowired

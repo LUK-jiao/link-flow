@@ -9,7 +9,7 @@ import com.linkflow.api.dto.common.Result;
 import java.util.List;
 
 /**
- * Campaign 服务接口
+ * Campaign 提供服务接口
  */
 public interface CampaignApi {
 
