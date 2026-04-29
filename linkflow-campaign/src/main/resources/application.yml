@@ -5,7 +5,7 @@ spring:
   application:
     name: linkflow-campaign
   datasource:
-    url: jdbc:mysql://localhost:3306/linkflow_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/short_link_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver

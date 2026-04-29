@@ -19,7 +19,7 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="com.linkflow.workflow.model.ApprovalRecord">
-    insert into short_link_db..approval_record (id, campaign_id, workflow_instance_id, 
+    insert into short_link_db.approval_record (id, campaign_id, workflow_instance_id,
       task_id, task_name, approver_id, 
       approver_name, action, comment, 
       approve_time, create_time)
@@ -29,7 +29,7 @@
       #{approveTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP})
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.linkflow.workflow.model.ApprovalRecord">
-    update short_link_db..approval_record
+    update short_link_db.approval_record
     set campaign_id = #{campaignId,jdbcType=BIGINT},
       workflow_instance_id = #{workflowInstanceId,jdbcType=BIGINT},
       task_id = #{taskId,jdbcType=VARCHAR},
@@ -45,12 +45,12 @@
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select id, campaign_id, workflow_instance_id, task_id, task_name, approver_id, approver_name, 
     action, comment, approve_time, create_time
-    from short_link_db..approval_record
+    from short_link_db.approval_record
     where id = #{id,jdbcType=BIGINT}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, campaign_id, workflow_instance_id, task_id, task_name, approver_id, approver_name, 
     action, comment, approve_time, create_time
-    from short_link_db..approval_record
+    from short_link_db.approval_record
   </select>
 </mapper>

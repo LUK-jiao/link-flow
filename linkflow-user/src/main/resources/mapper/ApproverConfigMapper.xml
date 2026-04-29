@@ -11,12 +11,12 @@
   </resultMap>
   
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from linkflow_db.approver_config
+    delete from short_link_db.approver_config
     where id = #{id,jdbcType=BIGINT}
   </delete>
   
   <insert id="insert" parameterType="com.linkflow.user.model.ApproverConfig">
-    insert into linkflow_db.approver_config (campaign_type, approver_id, 
+    insert into short_link_db.approver_config (campaign_type, approver_id, 
       approver_level, create_time, update_time
       )
     values (#{campaignType,jdbcType=VARCHAR}, #{approverId,jdbcType=BIGINT}, 
@@ -25,7 +25,7 @@
   </insert>
   
   <update id="updateByPrimaryKey" parameterType="com.linkflow.user.model.ApproverConfig">
-    update linkflow_db.approver_config
+    update short_link_db.approver_config
     set campaign_type = #{campaignType,jdbcType=VARCHAR},
       approver_id = #{approverId,jdbcType=BIGINT},
       approver_level = #{approverLevel,jdbcType=INTEGER},
@@ -36,12 +36,12 @@
   
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select id, campaign_type, approver_id, approver_level, create_time, update_time
-    from linkflow_db.approver_config
+    from short_link_db.approver_config
     where id = #{id,jdbcType=BIGINT}
   </select>
   
   <select id="selectAll" resultMap="BaseResultMap">
     select id, campaign_type, approver_id, approver_level, create_time, update_time
-    from linkflow_db.approver_config
+    from short_link_db.approver_config
   </select>
 </mapper>

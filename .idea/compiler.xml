@@ -7,8 +7,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="linkflow-mbg" />
-        <module name="linkflow-campaign" />
         <module name="linkflow-user" />
+        <module name="linkflow-api" />
+        <module name="linkflow-campaign" />
         <module name="linkflow-workflow" />
         <module name="linkflow-gateway" />
         <module name="linkflow-common" />

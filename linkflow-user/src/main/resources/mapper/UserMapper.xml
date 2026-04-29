@@ -14,12 +14,12 @@
   </resultMap>
   
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from linkflow_db.user
+    delete from short_link_db.user
     where id = #{id,jdbcType=BIGINT}
   </delete>
   
   <insert id="insert" parameterType="com.linkflow.user.model.User">
-    insert into linkflow_db.user (username, password, 
+    insert into short_link_db.user (username, password, 
       email, phone, role, 
       status, create_time, update_time
       )
@@ -30,7 +30,7 @@
   </insert>
   
   <update id="updateByPrimaryKey" parameterType="com.linkflow.user.model.User">
-    update linkflow_db.user
+    update short_link_db.user
     set username = #{username,jdbcType=VARCHAR},
       password = #{password,jdbcType=VARCHAR},
       email = #{email,jdbcType=VARCHAR},
@@ -44,12 +44,12 @@
   
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select id, username, password, email, phone, role, status, create_time, update_time
-    from linkflow_db.user
+    from short_link_db.user
     where id = #{id,jdbcType=BIGINT}
   </select>
   
   <select id="selectAll" resultMap="BaseResultMap">
     select id, username, password, email, phone, role, status, create_time, update_time
-    from linkflow_db.user
+    from short_link_db.user
   </select>
 </mapper>

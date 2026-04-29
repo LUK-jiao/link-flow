@@ -16,11 +16,11 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from linkflow_db.campaign
+    delete from short_link_db.campaign
     where id = #{id,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="com.linkflow.campaign.model.Campaign">
-    insert into linkflow_db.campaign (name, description,
+    insert into short_link_db.campaign (name, description,
       campaign_type, status, creator_user_id,
       start_time, end_time, budget,
       reject_reason, create_time, update_time
@@ -32,7 +32,7 @@
       )
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.linkflow.campaign.model.Campaign">
-    update linkflow_db.campaign
+    update short_link_db.campaign
     set name = #{name,jdbcType=VARCHAR},
       description = #{description,jdbcType=VARCHAR},
       campaign_type = #{campaignType,jdbcType=VARCHAR},
@@ -49,12 +49,12 @@
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select id, name, description, campaign_type, status, creator_user_id, start_time, 
     end_time, budget, reject_reason, create_time, update_time
-    from linkflow_db.campaign
+    from short_link_db.campaign
     where id = #{id,jdbcType=BIGINT}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, name, description, campaign_type, status, creator_user_id, start_time, 
     end_time, budget, reject_reason, create_time, update_time
-    from linkflow_db.campaign
+    from short_link_db.campaign
   </select>
 </mapper>
