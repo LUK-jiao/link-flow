@@ -33,6 +33,11 @@
         <!-- Dubbo -->
         <dependency>
             <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-spring-boot-starter</artifactId>
         </dependency>
 
@@ -66,6 +71,12 @@
             <artifactId>mapstruct-processor</artifactId>
             <version>1.5.5.Final</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- MBG 生成的模型 -->
+        <dependency>
+            <groupId>com.linkflow</groupId>
+            <artifactId>linkflow-mbg</artifactId>
         </dependency>
     </dependencies>
 
