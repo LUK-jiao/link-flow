@@ -119,11 +119,6 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.linkflow</groupId>
-            <artifactId>linkflow-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <!-- 构建插件 -->

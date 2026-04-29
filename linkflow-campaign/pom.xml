@@ -18,6 +18,12 @@
     </properties>
 
     <dependencies>
+        <!-- LinkFlow API 契约 -->
+        <dependency>
+            <groupId>com.linkflow</groupId>
+            <artifactId>linkflow-api</artifactId>
+        </dependency>
+
         <!-- Spring Boot Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
