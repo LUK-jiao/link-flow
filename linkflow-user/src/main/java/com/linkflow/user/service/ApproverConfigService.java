@@ -15,4 +15,9 @@ public interface ApproverConfigService {
      * 根据活动类型查询审批人配置
      */
     List<ApproverConfig> getByCampaignType(String campaignType);
+
+    /**
+     * 根据活动类型和审批级别查询审批人
+     */
+    List<ApproverConfig> getByCampaignTypeAndLevel(String campaignType, Integer level);
 }

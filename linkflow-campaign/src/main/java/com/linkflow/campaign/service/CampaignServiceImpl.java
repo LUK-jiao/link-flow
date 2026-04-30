@@ -27,7 +27,7 @@ public class CampaignServiceImpl implements CampaignApi {
     @Autowired
     private CampaignMapper campaignMapper;
 
-    @DubboReference
+    @DubboReference(check = false)
     private WorkflowApi workflowApi;
 
     @Override
@@ -89,6 +89,7 @@ public class CampaignServiceImpl implements CampaignApi {
         WorkflowStartDTO workflowDTO = new WorkflowStartDTO();
         workflowDTO.setBusinessKey(id);
         workflowDTO.setBusinessType("CAMPAIGN_APPROVAL");
+        workflowDTO.setCampaignType(campaign.getCampaignType());
         workflowDTO.setInitiatorId(campaign.getCreatorUserId());
         
         Result<String> workflowResult = workflowApi.startApprovalProcess(workflowDTO);

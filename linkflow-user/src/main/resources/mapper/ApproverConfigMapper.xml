@@ -44,4 +44,11 @@
     select id, campaign_type, approver_id, approver_level, create_time, update_time
     from short_link_db.approver_config
   </select>
+
+  <select id="selectByTypeAndLevel" resultMap="BaseResultMap">
+    select id, campaign_type, approver_id, approver_level, create_time, update_time
+    from short_link_db.approver_config
+    where campaign_type = #{campaignType,jdbcType=VARCHAR}
+      and approver_level = #{approverLevel,jdbcType=INTEGER}
+  </select>
 </mapper>

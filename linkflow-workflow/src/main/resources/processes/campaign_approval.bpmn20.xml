@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="http://linkflow.com/workflow">
+
+    <process id="campaign_approval" name="活动审批流程" isExecutable="true">
+
+        <!-- 开始节点 -->
+        <startEvent id="startEvent" name="开始"/>
+
+        <!-- Level1 审批（多实例，或签模式） -->
+        <userTask id="level1Approval" name="Level1审批"
+                  flowable:assignee="${approver}">
+            <multiInstanceLoopCharacteristics isSequential="false"
+                                               flowable:collection="${level1Approvers}"
+                                               flowable:elementVariable="approver">
+                <!-- 或签：一人通过即通过 -->
+                <completionCondition>${level1Approved || level1Rejected}</completionCondition>
+            </multiInstanceLoopCharacteristics>
+        </userTask>
+
+        <!-- Level1 结果网关 -->
+        <exclusiveGateway id="level1Gateway" name="Level1结果判断"/>
+
+        <!-- Level2 审批（多实例，或签模式） -->
+        <userTask id="level2Approval" name="Level2审批"
+                  flowable:assignee="${approver}">
+            <multiInstanceLoopCharacteristics isSequential="false"
+                                               flowable:collection="${level2Approvers}"
+                                               flowable:elementVariable="approver">
+                <!-- 或签：一人通过即通过 -->
+                <completionCondition>${level2Approved || level2Rejected}</completionCondition>
+            </multiInstanceLoopCharacteristics>
+        </userTask>
+
+        <!-- Level2 结果网关 -->
+        <exclusiveGateway id="level2Gateway" name="Level2结果判断"/>
+
+        <!-- 结束节点 - 通过 -->
+        <endEvent id="endApproved" name="审批通过"/>
+
+        <!-- 结束节点 - 拒绝 -->
+        <endEvent id="endRejected" name="审批拒绝"/>
+
+        <!-- 连线 -->
+        <sequenceFlow id="flow1" sourceRef="startEvent" targetRef="level1Approval"/>
+        
+        <sequenceFlow id="flow2" sourceRef="level1Approval" targetRef="level1Gateway"/>
+        
+        <sequenceFlow id="flow3" name="通过" sourceRef="level1Gateway" targetRef="level2Approval">
+            <conditionExpression xsi:type="tFormalExpression">${level1Approved == true}</conditionExpression>
+        </sequenceFlow>
+        
+        <sequenceFlow id="flow4" name="拒绝" sourceRef="level1Gateway" targetRef="endRejected">
+            <conditionExpression xsi:type="tFormalExpression">${level1Rejected == true}</conditionExpression>
+        </sequenceFlow>
+        
+        <sequenceFlow id="flow5" sourceRef="level2Approval" targetRef="level2Gateway"/>
+        
+        <sequenceFlow id="flow6" name="通过" sourceRef="level2Gateway" targetRef="endApproved">
+            <conditionExpression xsi:type="tFormalExpression">${level2Approved == true}</conditionExpression>
+        </sequenceFlow>
+        
+        <sequenceFlow id="flow7" name="拒绝" sourceRef="level2Gateway" targetRef="endRejected">
+            <conditionExpression xsi:type="tFormalExpression">${level2Rejected == true}</conditionExpression>
+        </sequenceFlow>
+
+    </process>
+
+</definitions>

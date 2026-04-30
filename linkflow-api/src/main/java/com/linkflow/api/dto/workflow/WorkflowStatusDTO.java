@@ -42,4 +42,14 @@ public class WorkflowStatusDTO implements Serializable {
      * 结束时间
      */
     private Date endTime;
+
+    /**
+     * 当前任务名称
+     */
+    private String currentTask;
+
+    /**
+     * 最终结果：APPROVED/REJECTED
+     */
+    private String finalResult;
 }

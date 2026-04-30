@@ -16,4 +16,9 @@ public interface ApproverConfigMapper {
     List<ApproverConfig> selectAll();
 
     int updateByPrimaryKey(ApproverConfig row);
+
+    /**
+     * 根据活动类型和审批级别查询
+     */
+    List<ApproverConfig> selectByTypeAndLevel(String campaignType, Integer level);
 }

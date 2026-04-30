@@ -51,4 +51,9 @@ public class ApproverConfigServiceImpl implements ApproverConfigService {
                 .filter(c -> c.getCampaignType().equals(campaignType))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ApproverConfig> getByCampaignTypeAndLevel(String campaignType, Integer level) {
+        return approverConfigMapper.selectByTypeAndLevel(campaignType, level);
+    }
 }

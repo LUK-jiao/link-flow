@@ -11,9 +11,17 @@ import java.util.List;
 public interface ApproverConfigApi {
 
     /**
-     * 根据活动类型查询审批人配置 todo 这个好像不太对，应该是根据活动类型和level
+     * 根据活动类型查询所有审批人配置
      */
     Result<List<ApproverDTO>> getApproverByType(String campaignType);
+
+    /**
+     * 根据活动类型和审批级别查询审批人
+     * @param campaignType 活动类型
+     * @param level 审批级别（1 或 2）
+     * @return 审批人列表
+     */
+    Result<List<ApproverDTO>> getApproverByTypeAndLevel(String campaignType, Integer level);
 
     /**
      * 配置审批人

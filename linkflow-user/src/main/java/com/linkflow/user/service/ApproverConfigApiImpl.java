@@ -43,6 +43,15 @@ public class ApproverConfigApiImpl implements ApproverConfigApi {
     }
 
     @Override
+    public Result<List<ApproverDTO>> getApproverByTypeAndLevel(String campaignType, Integer level) {
+        List<ApproverConfig> configs = approverConfigMapper.selectByTypeAndLevel(campaignType, level);
+        List<ApproverDTO> dtos = configs.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        return Result.success(dtos);
+    }
+
+    @Override
     public Result<Long> configApprover(ApproverDTO dto) {
         // 检查审批人是否存在
         User approver = userMapper.selectByPrimaryKey(dto.getApproverId());
