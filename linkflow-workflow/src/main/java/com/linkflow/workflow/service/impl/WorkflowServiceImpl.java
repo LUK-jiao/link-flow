@@ -218,7 +218,12 @@ public class WorkflowServiceImpl implements WorkflowService {
         String processInstanceId = task.getProcessInstanceId();
         String taskName = task.getName();
         String taskDefinitionKey = task.getTaskDefinitionKey();
-        Long campaignId = Long.parseLong(task.getProcessInstanceBusinessKey());
+        
+        // 通过 ProcessInstance 获取 businessKey
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .singleResult();
+        Long campaignId = Long.parseLong(processInstance.getBusinessKey());
 
         log.info("审批通过: taskId={}, approverId={}, taskName={}", taskId, approverId, taskName);
 
@@ -252,7 +257,12 @@ public class WorkflowServiceImpl implements WorkflowService {
         String processInstanceId = task.getProcessInstanceId();
         String taskName = task.getName();
         String taskDefinitionKey = task.getTaskDefinitionKey();
-        Long campaignId = Long.parseLong(task.getProcessInstanceBusinessKey());
+        
+        // 通过 ProcessInstance 获取 businessKey
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .singleResult();
+        Long campaignId = Long.parseLong(processInstance.getBusinessKey());
 
         log.info("审批拒绝: taskId={}, approverId={}, taskName={}, rejectReason={}", 
                  taskId, approverId, taskName, rejectReason);

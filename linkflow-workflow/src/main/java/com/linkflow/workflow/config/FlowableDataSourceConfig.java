@@ -49,8 +49,7 @@ public class FlowableDataSourceConfig {
             config.setDataSource(flowableDataSource);
             config.setDatabaseSchemaUpdate("true");
             config.setAsyncExecutorActivate(true);
-            config.setProcessDefinitionLocationPrefix("classpath*:processes/");
-            config.setProcessDefinitionLocationSuffixes(new String[]{"**.bpmn20.xml"});
+            // Flowable 自动扫描 classpath:processes/ 目录下的 bpmn20.xml 文件
         };
     }
 }
