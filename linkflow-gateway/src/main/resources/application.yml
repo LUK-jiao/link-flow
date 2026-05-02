@@ -1,0 +1,51 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: linkflow-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: linkflow
+      config:
+        server-addr: localhost:8848
+        namespace: linkflow
+        file-extension: yml
+        enabled: false
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # User 服务路由
+        - id: linkflow-user
+          uri: lb://linkflow-user
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=1
+
+        # Campaign 服务路由
+        - id: linkflow-campaign
+          uri: lb://linkflow-campaign
+          predicates:
+            - Path=/api/campaign/**
+          filters:
+            - StripPrefix=1
+
+        # Workflow 服务路由
+        - id: linkflow-workflow
+          uri: lb://linkflow-workflow
+          predicates:
+            - Path=/api/workflow/**
+          filters:
+            - StripPrefix=1
+
+# 日志配置
+logging:
+  level:
+    com.linkflow: debug
+    org.springframework.cloud.gateway: debug
