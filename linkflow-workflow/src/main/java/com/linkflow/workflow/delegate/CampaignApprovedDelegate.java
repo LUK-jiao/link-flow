@@ -10,6 +10,7 @@ import org.flowable.engine.runtime.ProcessInstance;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,14 +21,16 @@ public class CampaignApprovedDelegate implements JavaDelegate {
 
     private static final Logger log = LoggerFactory.getLogger(CampaignApprovedDelegate.class);
 
-    @DubboReference(check = false)
+    @DubboReference
     private CampaignApi campaignApi;
+
+    @Autowired
+    private RuntimeService runtimeService;
 
     @Override
     public void execute(DelegateExecution execution) {
         // 1. 获取 businessKey（campaignId）
         String processInstanceId = execution.getProcessInstanceId();
-        RuntimeService runtimeService = execution.getEngineServices().getRuntimeService();
         ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
                 .processInstanceId(processInstanceId)
                 .singleResult();
