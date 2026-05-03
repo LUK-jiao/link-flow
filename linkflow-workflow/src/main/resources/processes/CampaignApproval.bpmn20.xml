@@ -55,21 +55,21 @@
         <sequenceFlow sourceRef="level1Approval" targetRef="gateway1"/>
 
         <sequenceFlow sourceRef="gateway1" targetRef="level2Approval" name="通过">
-            <conditionExpression xsi:type="tFormalExpression">${level1Approved == true}</conditionExpression>
+            <conditionExpression xsi:type="tFormalExpression">${level1Approved}</conditionExpression>
         </sequenceFlow>
 
         <sequenceFlow sourceRef="gateway1" targetRef="callbackRejected" name="拒绝">
-            <conditionExpression xsi:type="tFormalExpression">${level1Rejected == true}</conditionExpression>
+            <conditionExpression xsi:type="tFormalExpression">${!level1Approved}</conditionExpression>
         </sequenceFlow>
 
         <sequenceFlow sourceRef="level2Approval" targetRef="gateway2"/>
 
         <sequenceFlow sourceRef="gateway2" targetRef="callbackApproved" name="通过">
-            <conditionExpression xsi:type="tFormalExpression">${level2Approved == true}</conditionExpression>
+            <conditionExpression xsi:type="tFormalExpression">${level2Approved }</conditionExpression>
         </sequenceFlow>
 
         <sequenceFlow sourceRef="gateway2" targetRef="callbackRejected" name="拒绝">
-            <conditionExpression xsi:type="tFormalExpression">${level2Rejected == true}</conditionExpression>
+            <conditionExpression xsi:type="tFormalExpression">${!level2Approved}</conditionExpression>
         </sequenceFlow>
 
         <sequenceFlow sourceRef="callbackApproved" targetRef="endApproved"/>
