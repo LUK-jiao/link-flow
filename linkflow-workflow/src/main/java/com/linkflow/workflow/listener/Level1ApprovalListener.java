@@ -43,10 +43,9 @@ public class Level1ApprovalListener implements TaskListener {
         String action = (String) delegateTask.getVariable("action");
         String comment = (String) delegateTask.getVariable("comment");
 
-        // 5. 设置流程变量（用于网关判断流程走向）
+        // 5. 设置流程变量（用于网关判断流程走向和多实例提前终止）
         boolean isApproved = "approve".equalsIgnoreCase(action);
         delegateTask.setVariable("level1Approved", isApproved);
-        delegateTask.setVariable("level1Rejected", !isApproved);
 
         // 6. 如果拒绝，设置拒绝原因（供 CampaignRejectedDelegate 使用）
         if (!isApproved && comment != null) {

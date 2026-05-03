@@ -12,7 +12,7 @@
         <!-- 一级审批（多实例-或签） -->
         <userTask id="level1Approval" name="一级审批" flowable:assignee="${approver}">
             <multiInstanceLoopCharacteristics flowable:collection="${level1Approvers}" flowable:elementVariable="approver">
-                <completionCondition>${nrOfCompletedInstances >= 1 || level1Rejected}</completionCondition>
+                <completionCondition>${nrOfCompletedInstances >= 1 || level1Approved == false}</completionCondition>
             </multiInstanceLoopCharacteristics>
             <extensionElements>
                 <flowable:taskListener event="complete"
@@ -26,7 +26,7 @@
         <!-- 二级审批（多实例-或签） -->
         <userTask id="level2Approval" name="二级审批" flowable:assignee="${approver}">
             <multiInstanceLoopCharacteristics flowable:collection="${level2Approvers}" flowable:elementVariable="approver">
-                <completionCondition>${nrOfCompletedInstances >= 1 || level2Rejected}</completionCondition>
+                <completionCondition>${nrOfCompletedInstances >= 1 || level2Approved == false}</completionCondition>
             </multiInstanceLoopCharacteristics>
             <extensionElements>
                 <flowable:taskListener event="complete"
