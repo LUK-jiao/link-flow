@@ -1,113 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.linkflow.workflow.mapper.ApprovalRecordMapper">
-  <resultMap id="BaseResultMap" type="com.linkflow.workflow.model.ApprovalRecord">
-    <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="campaign_id" jdbcType="BIGINT" property="campaignId" />
-    <result column="process_instance_id" jdbcType="VARCHAR" property="processInstanceId" />
-    <result column="task_id" jdbcType="VARCHAR" property="taskId" />
-    <result column="task_name" jdbcType="VARCHAR" property="taskName" />
-    <result column="approver_id" jdbcType="BIGINT" property="approverId" />
-    <result column="approver_name" jdbcType="VARCHAR" property="approverName" />
-    <result column="action" jdbcType="VARCHAR" property="action" />
-    <result column="comment" jdbcType="VARCHAR" property="comment" />
-    <result column="approve_time" jdbcType="TIMESTAMP" property="approveTime" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-  </resultMap>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from short_link_db..approval_record
-    where id = #{id,jdbcType=BIGINT}
-  </delete>
-  <insert id="insert" parameterType="com.linkflow.workflow.model.ApprovalRecord">
-    insert into short_link_db..approval_record (id, campaign_id, process_instance_id, 
-      task_id, task_name, approver_id, 
-      approver_name, action, comment, 
-      approve_time, create_time)
-    values (#{id,jdbcType=BIGINT}, #{campaignId,jdbcType=BIGINT}, #{processInstanceId,jdbcType=VARCHAR}, 
-      #{taskId,jdbcType=VARCHAR}, #{taskName,jdbcType=VARCHAR}, #{approverId,jdbcType=BIGINT}, 
-      #{approverName,jdbcType=VARCHAR}, #{action,jdbcType=VARCHAR}, #{comment,jdbcType=VARCHAR}, 
-      #{approveTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP})
-  </insert>
-  <update id="updateByPrimaryKey" parameterType="com.linkflow.workflow.model.ApprovalRecord">
-    update short_link_db..approval_record
-    set campaign_id = #{campaignId,jdbcType=BIGINT},
-      process_instance_id = #{processInstanceId,jdbcType=VARCHAR},
-      task_id = #{taskId,jdbcType=VARCHAR},
-      task_name = #{taskName,jdbcType=VARCHAR},
-      approver_id = #{approverId,jdbcType=BIGINT},
-      approver_name = #{approverName,jdbcType=VARCHAR},
-      action = #{action,jdbcType=VARCHAR},
-      comment = #{comment,jdbcType=VARCHAR},
-      approve_time = #{approveTime,jdbcType=TIMESTAMP},
-      create_time = #{createTime,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=BIGINT}
-  </update>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select id, campaign_id, process_instance_id, task_id, task_name, approver_id, approver_name, 
-    action, comment, approve_time, create_time
-    from short_link_db..approval_record
-    where id = #{id,jdbcType=BIGINT}
-  </select>
-  <select id="selectAll" resultMap="BaseResultMap">
-    select id, campaign_id, process_instance_id, task_id, task_name, approver_id, approver_name, 
-    action, comment, approve_time, create_time
-    from short_link_db..approval_record
-  </select>
-  <resultMap id="BaseResultMap" type="com.linkflow.workflow.model.ApprovalRecord">
-    <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="campaign_id" jdbcType="BIGINT" property="campaignId" />
-    <result column="workflow_instance_id" jdbcType="BIGINT" property="workflowInstanceId" />
-    <result column="task_id" jdbcType="VARCHAR" property="taskId" />
-    <result column="task_name" jdbcType="VARCHAR" property="taskName" />
-    <result column="approver_id" jdbcType="BIGINT" property="approverId" />
-    <result column="approver_name" jdbcType="VARCHAR" property="approverName" />
-    <result column="action" jdbcType="VARCHAR" property="action" />
-    <result column="comment" jdbcType="VARCHAR" property="comment" />
-    <result column="approve_time" jdbcType="TIMESTAMP" property="approveTime" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-  </resultMap>
+    <resultMap id="BaseResultMap" type="com.linkflow.workflow.model.ApprovalRecord">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="campaign_id" jdbcType="BIGINT" property="campaignId"/>
+        <result column="process_instance_id" jdbcType="VARCHAR" property="processInstanceId"/>
+        <result column="task_id" jdbcType="VARCHAR" property="taskId"/>
+        <result column="task_name" jdbcType="VARCHAR" property="taskName"/>
+        <result column="approver_id" jdbcType="BIGINT" property="approverId"/>
+        <result column="approver_name" jdbcType="VARCHAR" property="approverName"/>
+        <result column="action" jdbcType="VARCHAR" property="action"/>
+        <result column="comment" jdbcType="VARCHAR" property="comment"/>
+        <result column="approve_time" jdbcType="TIMESTAMP" property="approveTime"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
 
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from approval_record
-    where id = #{id,jdbcType=BIGINT}
-  </delete>
+    <insert id="insert" parameterType="com.linkflow.workflow.model.ApprovalRecord"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO approval_record (
+            campaign_id, process_instance_id, task_id, task_name,
+            approver_id, approver_name, action, comment,
+            approve_time, create_time
+        ) VALUES (
+            #{campaignId,jdbcType=BIGINT}, #{processInstanceId,jdbcType=VARCHAR},
+            #{taskId,jdbcType=VARCHAR}, #{taskName,jdbcType=VARCHAR},
+            #{approverId,jdbcType=BIGINT}, #{approverName,jdbcType=VARCHAR},
+            #{action,jdbcType=VARCHAR}, #{comment,jdbcType=VARCHAR},
+            #{approveTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
 
-  <insert id="insert" keyProperty="id" parameterType="com.linkflow.workflow.model.ApprovalRecord" useGeneratedKeys="true">
-    insert into approval_record (campaign_id, workflow_instance_id,
-      task_id, task_name, approver_id, 
-      approver_name, action, comment, 
-      approve_time, create_time)
-    values (#{campaignId,jdbcType=BIGINT}, #{workflowInstanceId,jdbcType=BIGINT}, 
-      #{taskId,jdbcType=VARCHAR}, #{taskName,jdbcType=VARCHAR}, #{approverId,jdbcType=BIGINT}, 
-      #{approverName,jdbcType=VARCHAR}, #{action,jdbcType=VARCHAR}, #{comment,jdbcType=VARCHAR}, 
-      #{approveTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP})
-  </insert>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT id, campaign_id, process_instance_id, task_id, task_name,
+               approver_id, approver_name, action, comment, approve_time, create_time
+        FROM approval_record
+        WHERE id = #{id,jdbcType=BIGINT}
+    </select>
 
-  <update id="updateByPrimaryKey" parameterType="com.linkflow.workflow.model.ApprovalRecord">
-    update approval_record
-    set campaign_id = #{campaignId,jdbcType=BIGINT},
-      workflow_instance_id = #{workflowInstanceId,jdbcType=BIGINT},
-      task_id = #{taskId,jdbcType=VARCHAR},
-      task_name = #{taskName,jdbcType=VARCHAR},
-      approver_id = #{approverId,jdbcType=BIGINT},
-      approver_name = #{approverName,jdbcType=VARCHAR},
-      action = #{action,jdbcType=VARCHAR},
-      comment = #{comment,jdbcType=VARCHAR},
-      approve_time = #{approveTime,jdbcType=TIMESTAMP},
-      create_time = #{createTime,jdbcType=TIMESTAMP}
-    where id = #{id,jdbcType=BIGINT}
-  </update>
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT id, campaign_id, process_instance_id, task_id, task_name,
+               approver_id, approver_name, action, comment, approve_time, create_time
+        FROM approval_record
+    </select>
 
-  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select id, campaign_id, workflow_instance_id, task_id, task_name, approver_id, approver_name, 
-    action, comment, approve_time, create_time
-    from approval_record
-    where id = #{id,jdbcType=BIGINT}
-  </select>
+    <update id="updateByPrimaryKey" parameterType="com.linkflow.workflow.model.ApprovalRecord">
+        UPDATE approval_record
+        SET campaign_id = #{campaignId,jdbcType=BIGINT},
+            process_instance_id = #{processInstanceId,jdbcType=VARCHAR},
+            task_id = #{taskId,jdbcType=VARCHAR},
+            task_name = #{taskName,jdbcType=VARCHAR},
+            approver_id = #{approverId,jdbcType=BIGINT},
+            approver_name = #{approverName,jdbcType=VARCHAR},
+            action = #{action,jdbcType=VARCHAR},
+            comment = #{comment,jdbcType=VARCHAR},
+            approve_time = #{approveTime,jdbcType=TIMESTAMP},
+            create_time = #{createTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id,jdbcType=BIGINT}
+    </update>
 
-  <select id="selectAll" resultMap="BaseResultMap">
-    select id, campaign_id, workflow_instance_id, task_id, task_name, approver_id, approver_name, 
-    action, comment, approve_time, create_time
-    from approval_record
-  </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM approval_record WHERE id = #{id,jdbcType=BIGINT}
+    </delete>
 </mapper>

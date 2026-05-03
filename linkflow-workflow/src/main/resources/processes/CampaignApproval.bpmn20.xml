@@ -39,11 +39,11 @@
 
         <!-- 回调Campaign服务（通过） -->
         <serviceTask id="callbackApproved" name="回调Campaign-通过"
-                     flowable:class="com.linkflow.workflow.delegate.CampaignApprovedDelegate"/>
+                     flowable:delegateExpression="${campaignApprovedDelegate}"/>
 
         <!-- 回调Campaign服务（拒绝） -->
         <serviceTask id="callbackRejected" name="回调Campaign-拒绝"
-                     flowable:class="com.linkflow.workflow.delegate.CampaignRejectedDelegate"/>
+                     flowable:delegateExpression="${campaignRejectedDelegate}"/>
 
         <!-- 结束节点 -->
         <endEvent id="endApproved" name="审批通过"/>

@@ -13,6 +13,7 @@ import java.util.Date;
 
 @Component
 public class Level1ApprovalListener implements TaskListener {
+
     @Autowired
     private ApprovalRecordMapper approvalRecordMapper;
 
@@ -21,30 +22,38 @@ public class Level1ApprovalListener implements TaskListener {
 
     @Override
     public void notify(DelegateTask delegateTask) {
-        //campaign_id是businessKey
+        // campaign_id 是 businessKey
         // 1. 获取流程实例ID
         String processInstanceId = delegateTask.getProcessInstanceId();
 
         // 2. 获取 businessKey（即 campaignId）
-        ProcessInstance processInstance = (ProcessInstance) runtimeService.createProcessInstanceQuery()
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
                 .processInstanceId(processInstanceId)
                 .singleResult();
         Long campaignId = processInstance != null ?
                 Long.valueOf(processInstance.getBusinessKey()) : null;
 
         // 3. 获取审批人信息
-        Long approverId = Long.valueOf(delegateTask.getAssignee()); // 当前审批人
-        String approverName = (String)delegateTask.getVariableLocal("approverName");
+        String approver = delegateTask.getAssignee();
+        Long approverId = parseApproverId(approver);
+        String approverName = delegateTask.getVariable("approverName") != null ?
+                (String) delegateTask.getVariable("approverName") : approver;
 
         // 4. 获取审批结果和意见（前端提交的表单变量）
-        String action = (String) delegateTask.getVariableLocal("action");
-        String comment = (String) delegateTask.getVariableLocal("comment");
+        String action = (String) delegateTask.getVariable("action");
+        String comment = (String) delegateTask.getVariable("comment");
 
         // 5. 设置流程变量（用于网关判断流程走向）
         boolean isApproved = "approve".equalsIgnoreCase(action);
         delegateTask.setVariable("level1Approved", isApproved);
+        delegateTask.setVariable("level1Rejected", !isApproved);
 
-        // 6. 构建并插入审批记录
+        // 6. 如果拒绝，设置拒绝原因（供 CampaignRejectedDelegate 使用）
+        if (!isApproved && comment != null) {
+            delegateTask.setVariable("rejectReason", comment);
+        }
+
+        // 7. 构建并插入审批记录
         ApprovalRecord record = new ApprovalRecord();
         record.setCampaignId(campaignId);
         record.setProcessInstanceId(processInstanceId);
@@ -58,5 +67,22 @@ public class Level1ApprovalListener implements TaskListener {
         record.setCreateTime(new Date());
 
         approvalRecordMapper.insert(record);
+    }
+
+    /**
+     * 解析审批人ID
+     */
+    private Long parseApproverId(String approver) {
+        if (approver == null || approver.isEmpty()) {
+            return null;
+        }
+        try {
+            if (approver.contains(":")) {
+                return Long.valueOf(approver.substring(approver.lastIndexOf(":") + 1));
+            }
+            return Long.valueOf(approver);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

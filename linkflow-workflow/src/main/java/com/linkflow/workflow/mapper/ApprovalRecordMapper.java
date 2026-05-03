@@ -1,16 +1,19 @@
 package com.linkflow.workflow.mapper;
 
 import com.linkflow.workflow.model.ApprovalRecord;
+import org.apache.ibatis.annotations.Mapper;
+
 import java.util.List;
 
+@Mapper
 public interface ApprovalRecordMapper {
-    int deleteByPrimaryKey(Long id);
-
-    int insert(ApprovalRecord row);
+    int insert(ApprovalRecord record);
 
     ApprovalRecord selectByPrimaryKey(Long id);
 
-    List<ApprovalRecord> selectAll();
+    int updateByPrimaryKey(ApprovalRecord record);
 
-    int updateByPrimaryKey(ApprovalRecord row);
+    int deleteByPrimaryKey(Long id);
+
+    List<ApprovalRecord> selectAll();
 }
