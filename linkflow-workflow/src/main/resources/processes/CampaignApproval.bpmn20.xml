@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="http://linkflow.com/campaign">
+
+    <process id="campaignApproval" name="活动审批流程" isExecutable="true">
+
+        <!-- 开始节点 -->
+        <startEvent id="start" name="开始"/>
+
+        <!-- 一级审批（多实例-或签） -->
+        <userTask id="level1Approval" name="一级审批" flowable:assignee="${approver}">
+            <multiInstanceLoopCharacteristics flowable:collection="${level1Approvers}" flowable:elementVariable="approver">
+                <completionCondition>${nrOfCompletedInstances >= 1 || level1Rejected}</completionCondition>
+            </multiInstanceLoopCharacteristics>
+            <extensionElements>
+                <flowable:taskListener event="complete"
+                                       class="com.linkflow.workflow.listener.Level1ApprovalListener"/>
+            </extensionElements>
+        </userTask>
+
+        <!-- 排他网关：判断一级审批结果 -->
+        <exclusiveGateway id="gateway1" name="一级审批结果"/>
+
+        <!-- 二级审批（多实例-或签） -->
+        <userTask id="level2Approval" name="二级审批" flowable:assignee="${approver}">
+            <multiInstanceLoopCharacteristics flowable:collection="${level2Approvers}" flowable:elementVariable="approver">
+                <completionCondition>${nrOfCompletedInstances >= 1 || level2Rejected}</completionCondition>
+            </multiInstanceLoopCharacteristics>
+            <extensionElements>
+                <flowable:taskListener event="complete"
+                                       class="com.linkflow.workflow.listener.Level2ApprovalListener"/>
+            </extensionElements>
+        </userTask>
+
+        <!-- 排他网关：判断二级审批结果 -->
+        <exclusiveGateway id="gateway2" name="二级审批结果"/>
+
+        <!-- 回调Campaign服务（通过） -->
+        <serviceTask id="callbackApproved" name="回调Campaign-通过"
+                     flowable:class="com.linkflow.workflow.delegate.CampaignApprovedDelegate"/>
+
+        <!-- 回调Campaign服务（拒绝） -->
+        <serviceTask id="callbackRejected" name="回调Campaign-拒绝"
+                     flowable:class="com.linkflow.workflow.delegate.CampaignRejectedDelegate"/>
+
+        <!-- 结束节点 -->
+        <endEvent id="endApproved" name="审批通过"/>
+        <endEvent id="endRejected" name="审批拒绝"/>
+
+        <!-- 连线 -->
+        <sequenceFlow sourceRef="start" targetRef="level1Approval"/>
+
+        <sequenceFlow sourceRef="level1Approval" targetRef="gateway1"/>
+
+        <sequenceFlow sourceRef="gateway1" targetRef="level2Approval" name="通过">
+            <conditionExpression xsi:type="tFormalExpression">${level1Approved == true}</conditionExpression>
+        </sequenceFlow>
+
+        <sequenceFlow sourceRef="gateway1" targetRef="callbackRejected" name="拒绝">
+            <conditionExpression xsi:type="tFormalExpression">${level1Rejected == true}</conditionExpression>
+        </sequenceFlow>
+
+        <sequenceFlow sourceRef="level2Approval" targetRef="gateway2"/>
+
+        <sequenceFlow sourceRef="gateway2" targetRef="callbackApproved" name="通过">
+            <conditionExpression xsi:type="tFormalExpression">${level2Approved == true}</conditionExpression>
+        </sequenceFlow>
+
+        <sequenceFlow sourceRef="gateway2" targetRef="callbackRejected" name="拒绝">
+            <conditionExpression xsi:type="tFormalExpression">${level2Rejected == true}</conditionExpression>
+        </sequenceFlow>
+
+        <sequenceFlow sourceRef="callbackApproved" targetRef="endApproved"/>
+
+        <sequenceFlow sourceRef="callbackRejected" targetRef="endRejected"/>
+
+    </process>
+
+</definitions>
