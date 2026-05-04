@@ -11,6 +11,7 @@ import org.flowable.engine.HistoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.slf4j.Logger;
@@ -166,6 +167,10 @@ public class WorkflowApiImpl implements WorkflowApi {
                 dto.getProcessInstanceId(), dto.getTaskId(), dto.getApproverId(), dto.getApproverName(), dto.getComment());
 
         try {
+            Result<Void> validation = validatePendingTask(dto.getTaskId(), dto.getProcessInstanceId());
+            if (validation != null) {
+                return validation;
+            }
             // 设置任务变量
             Map<String, Object> variables = new HashMap<>();
             variables.put("action", "approve");
@@ -191,6 +196,10 @@ public class WorkflowApiImpl implements WorkflowApi {
                 dto.getProcessInstanceId(), dto.getTaskId(), dto.getApproverId(), dto.getApproverName(), dto.getComment(), dto.getRejectReason());
 
         try {
+            Result<Void> validation = validatePendingTask(dto.getTaskId(), dto.getProcessInstanceId());
+            if (validation != null) {
+                return validation;
+            }
             // 设置任务变量
             Map<String, Object> variables = new HashMap<>();
             variables.put("action", "reject");
@@ -245,26 +254,52 @@ public class WorkflowApiImpl implements WorkflowApi {
         dto.setEndTime(historicInstance.getEndTime());
 
         if (historicInstance.getEndTime() != null) {
-            dto.setStatus("COMPLETED");
-            // 根据流程结束状态判断最终结果
             String deleteReason = historicInstance.getDeleteReason();
-            if (deleteReason != null) {
+            if (deleteReason != null && !deleteReason.isBlank()) {
                 dto.setStatus("CANCELLED");
-            } else {
-                // 查询流程变量判断最终结果
-                Object finalResult = historyService.createHistoricVariableInstanceQuery()
-                        .processInstanceId(historicInstance.getId())
-                        .variableName("level2Approved")
-                        .singleResult();
+                dto.setFinalResult("CANCELLED");
+                return dto;
+            }
 
-                if (finalResult != null && Boolean.TRUE.equals(finalResult)) {
-                    dto.setFinalResult("APPROVED");
-                } else {
-                    dto.setFinalResult("REJECTED");
-                }
+            dto.setStatus("COMPLETED");
+            Boolean level2Approved = getHistoricBooleanVar(historicInstance.getId(), "level2Approved");
+            if (Boolean.TRUE.equals(level2Approved)) {
+                dto.setFinalResult("APPROVED");
+                return dto;
+            }
+
+            Boolean level1Approved = getHistoricBooleanVar(historicInstance.getId(), "level1Approved");
+            if (Boolean.FALSE.equals(level1Approved) || Boolean.FALSE.equals(level2Approved)) {
+                dto.setFinalResult("REJECTED");
+            } else {
+                dto.setFinalResult("UNKNOWN");
             }
         }
 
         return dto;
+    }
+
+    private Result<Void> validatePendingTask(String taskId, String processInstanceId) {
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        if (task == null) {
+            log.warn("任务不存在或已处理, taskId={}", taskId);
+            return Result.fail(409, "任务不存在或已处理，请勿重复审批");
+        }
+        if (processInstanceId != null && !processInstanceId.equals(task.getProcessInstanceId())) {
+            log.warn("任务与流程实例不匹配, taskId={}, requestProcessInstanceId={}, actualProcessInstanceId={}",
+                    taskId, processInstanceId, task.getProcessInstanceId());
+            return Result.fail(400, "任务与流程实例不匹配");
+        }
+        return null;
+    }
+
+    private Boolean getHistoricBooleanVar(String processInstanceId, String variableName) {
+        HistoricVariableInstance var = historyService.createHistoricVariableInstanceQuery()
+                .processInstanceId(processInstanceId)
+                .variableName(variableName)
+                .singleResult();
+        if (var == null) return null;
+        Object value = var.getValue();
+        return value instanceof Boolean ? (Boolean) value : null;
     }
 }

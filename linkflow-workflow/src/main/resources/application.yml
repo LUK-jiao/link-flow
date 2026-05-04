@@ -1,0 +1,49 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: linkflow-workflow
+  datasource:
+    flowable:
+      url: jdbc:mysql://localhost:3306/linkflow_flowable?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+      username: root
+      password: 123456
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    business:
+      url: jdbc:mysql://localhost:3306/short_link_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+      username: root
+      password: 123456
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.linkflow.workflow.model
+
+flowable:
+  database-schema-update: true
+  check-process-definitions: true
+  async-executor-activate: false
+  process-definition-location-prefix: classpath:/processes/
+  process-definition-location-suffixes:
+    - "**.bpmn20.xml"
+
+dubbo:
+  application:
+    name: linkflow-workflow
+    qos-enable: false
+  registry:
+    address: nacos://localhost:8848
+    parameters:
+      namespace: linkflow
+  protocol:
+    name: dubbo
+    port: 20882
+  scan:
+    base-packages: com.linkflow.workflow.service
+
+logging:
+  level:
+    com.linkflow.workflow: info
+    org.flowable: info
+

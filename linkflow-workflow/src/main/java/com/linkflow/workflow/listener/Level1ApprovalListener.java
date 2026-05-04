@@ -34,15 +34,18 @@ public class Level1ApprovalListener implements TaskListener {
                 Long.valueOf(processInstance.getBusinessKey()) : null;
 
         // 3. 获取审批人信息
-        Long approverId = Long.valueOf(delegateTask.getAssignee());
+        Long approverId = parseLong(delegateTask.getAssignee());
         String approverName = (String) delegateTask.getVariableLocal("approverName");
+        if (approverName == null || approverName.isBlank()) {
+            approverName = delegateTask.getAssignee();
+        }
 
         // 4. 获取审批结果和意见（前端提交的表单变量）
-        String action = (String) delegateTask.getVariableLocal("action");
+        String action = normalizeAction((String) delegateTask.getVariableLocal("action"));
         String comment = (String) delegateTask.getVariableLocal("comment");
 
         // 5. 设置流程变量（用于网关判断流程走向和多实例提前终止）
-        boolean isApproved = "approve".equalsIgnoreCase(action);
+        boolean isApproved = "approve".equals(action);
         delegateTask.setVariable("level1Approved", isApproved);
 
         // 6. 如果拒绝，设置拒绝原因（供 CampaignRejectedDelegate 使用）
@@ -67,5 +70,23 @@ public class Level1ApprovalListener implements TaskListener {
         record.setCreateTime(new Date());
 
         approvalRecordMapper.insert(record);
+    }
+
+    private String normalizeAction(String action) {
+        if ("reject".equalsIgnoreCase(action)) {
+            return "reject";
+        }
+        return "approve";
+    }
+
+    private Long parseLong(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }

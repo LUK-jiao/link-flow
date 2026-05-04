@@ -40,6 +40,7 @@
         <!-- Dubbo & Nacos 版本 -->
         <dubbo.version>3.2.0</dubbo.version>
         <nacos.version>2.3.0</nacos.version>
+        <lombok.version>1.18.38</lombok.version>
     </properties>
 
     <!-- 依赖管理（子模块继承版本，不需要写 version） -->
@@ -138,7 +139,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <version>${lombok.version}</version>
         </dependency>
     </dependencies>
 
@@ -158,6 +159,13 @@
                     <configuration>
                         <source>17</source>
                         <target>17</target>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
             </plugins>
