@@ -31,12 +31,12 @@ public class WorkflowApiImpl implements WorkflowApi {
     }
 
     @Override
-    public Result<Void> approve(String processInstanceId, Long approverId, String comment) {
+    public Result<Void> approve(String processInstanceId, String taskId, Long approverId, String comment) {
         return null;
     }
 
     @Override
-    public Result<Void> reject(String processInstanceId, Long approverId, String comment, String rejectReason) {
+    public Result<Void> reject(String processInstanceId, String taskId,Long approverId,  String comment, String rejectReason) {
         return null;
     }
 }

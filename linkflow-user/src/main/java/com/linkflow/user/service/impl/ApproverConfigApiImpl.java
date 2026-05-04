@@ -1,4 +1,4 @@
-package com.linkflow.user.service;
+package com.linkflow.user.service.impl;
 
 import com.linkflow.api.ApproverConfigApi;
 import com.linkflow.api.dto.common.Result;

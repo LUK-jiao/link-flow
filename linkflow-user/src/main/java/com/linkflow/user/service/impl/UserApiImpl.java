@@ -1,4 +1,4 @@
-package com.linkflow.user.service;
+package com.linkflow.user.service.impl;
 
 import com.linkflow.api.UserApi;
 import com.linkflow.api.dto.common.Result;
@@ -9,6 +9,7 @@ import com.linkflow.user.model.User;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
@@ -16,6 +17,7 @@ import java.util.Date;
  * User Dubbo 服务实现
  */
 @DubboService
+@Service
 public class UserApiImpl implements UserApi {
 
     @Autowired

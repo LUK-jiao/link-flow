@@ -45,9 +45,11 @@ public class Level2ApprovalListener implements TaskListener {
         boolean isApproved = "approve".equalsIgnoreCase(action);
         delegateTask.setVariable("level2Approved", isApproved);
 
+        String rejectReason = "";
         // 6. 如果拒绝，设置拒绝原因（供 CampaignRejectedDelegate 使用）
-        if (!isApproved && comment != null) {
-            delegateTask.setVariable("rejectReason", comment);
+        if (!isApproved) {
+            rejectReason = delegateTask.getVariable("rejectReason") != null ? (String)delegateTask.getVariable("rejectReason") : comment;
+            delegateTask.setVariable("rejectReason", rejectReason);
         }
 
         // 7. 构建并插入审批记录
@@ -60,6 +62,7 @@ public class Level2ApprovalListener implements TaskListener {
         record.setApproverName(approverName);
         record.setAction(action);
         record.setComment(comment);
+        record.setRejectReason(rejectReason);
         record.setApproveTime(new Date());
         record.setCreateTime(new Date());
 

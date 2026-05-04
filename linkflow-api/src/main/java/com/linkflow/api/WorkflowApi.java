@@ -33,10 +33,10 @@ public interface WorkflowApi {
     /**
      * 审批通过
      */
-    Result<Void> approve(String processInstanceId, Long approverId, String comment);
+    Result<Void> approve(String processInstanceId, String taskId,Long approverId, String comment);
 
     /**
      * 审批拒绝
      */
-    Result<Void> reject(String processInstanceId, Long approverId, String comment, String rejectReason);
+    Result<Void> reject(String processInstanceId, String taskId, Long approverId, String comment, String rejectReason);
 }

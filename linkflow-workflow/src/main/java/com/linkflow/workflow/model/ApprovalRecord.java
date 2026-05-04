@@ -24,6 +24,8 @@ public class ApprovalRecord {
 
     private String comment;
 
+    private String rejectReason;
+
     private Date approveTime;
 
     private Date createTime;
