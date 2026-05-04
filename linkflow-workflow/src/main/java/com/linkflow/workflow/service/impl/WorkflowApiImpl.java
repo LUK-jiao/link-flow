@@ -159,7 +159,7 @@ public class WorkflowApiImpl implements WorkflowApi {
     }
 
     @Override
-    public Result<Void> approve(String processInstanceId, String taskId, Long approverId, String comment) {
+    public Result<Void> approve(String processInstanceId, String taskId, Long approverId, String approverName,String comment) {
         log.info("com.linkflow.workflow.service.impl.WorkflowApiImpl#approve 审批通过, processInstanceId={}, taskId={}, approverId={}, comment={}",
                 processInstanceId, taskId, approverId, comment);
 
@@ -168,6 +168,7 @@ public class WorkflowApiImpl implements WorkflowApi {
             Map<String, Object> variables = new HashMap<>();
             variables.put("action", "approve");
             variables.put("comment", comment);
+            variables.put("approverName", approverName);
 
             // 完成任务
             taskService.complete(taskId, variables);
@@ -183,7 +184,7 @@ public class WorkflowApiImpl implements WorkflowApi {
     }
 
     @Override
-    public Result<Void> reject(String processInstanceId, String taskId, Long approverId, String comment, String rejectReason) {
+    public Result<Void> reject(String processInstanceId, String taskId, String approverName,Long approverId, String comment, String rejectReason) {
         log.info("com.linkflow.workflow.service.impl.WorkflowApiImpl#reject 审批拒绝, processInstanceId={}, taskId={}, approverId={}, comment={}, rejectReason={}",
                 processInstanceId, taskId, approverId, comment, rejectReason);
 
