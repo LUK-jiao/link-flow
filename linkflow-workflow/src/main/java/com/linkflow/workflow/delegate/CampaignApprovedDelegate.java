@@ -1,13 +1,12 @@
 package com.linkflow.workflow.delegate;
 
-import com.linkflow.api.CampaignApi;
 import com.linkflow.api.dto.campaign.CampaignStatusUpdateDTO;
 import com.linkflow.api.dto.common.Result;
+import com.linkflow.workflow.service.CampaignService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
 import org.flowable.engine.runtime.ProcessInstance;
-import org.apache.dubbo.config.annotation.DubboReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +20,8 @@ public class CampaignApprovedDelegate implements JavaDelegate {
 
     private static final Logger log = LoggerFactory.getLogger(CampaignApprovedDelegate.class);
 
-    @DubboReference
-    private CampaignApi campaignApi;
+    @Autowired
+    private CampaignService campaignService;
 
     @Autowired
     private RuntimeService runtimeService;
@@ -47,10 +46,10 @@ public class CampaignApprovedDelegate implements JavaDelegate {
         dto.setCampaignId(campaignId);
         dto.setStatus("APPROVED");
 
-        // 3. 调用 Campaign 服务更新状态
-        Result<Void> result = campaignApi.updateCampaignStatus(dto);
+        // 3. 调用 CampaignService 更新状态
+        Result<Void> result = campaignService.updateCampaignStatus(dto);
 
-        if (result.getCode() == 200) {
+        if (result.isSuccess()) {
             log.info("活动审批通过，campaignId: {}", campaignId);
         } else {
             log.error("更新活动状态失败: campaignId={}, error={}", campaignId, result.getMessage());
