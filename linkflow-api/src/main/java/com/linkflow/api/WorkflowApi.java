@@ -1,6 +1,7 @@
 package com.linkflow.api;
 
-import com.linkflow.api.dto.workflow.ApprovalCallbackDTO;
+import com.linkflow.api.dto.workflow.ApprovalRequestDTO;
+import com.linkflow.api.dto.workflow.RejectRequestDTO;
 import com.linkflow.api.dto.workflow.WorkflowStartDTO;
 import com.linkflow.api.dto.workflow.WorkflowStatusDTO;
 import com.linkflow.api.dto.common.Result;
@@ -33,10 +34,10 @@ public interface WorkflowApi {
     /**
      * 审批通过
      */
-    Result<Void> approve(String processInstanceId, String taskId,Long approverId, String comment);
+    Result<Void> approve(ApprovalRequestDTO dto);
 
     /**
      * 审批拒绝
      */
-    Result<Void> reject(String processInstanceId, String taskId, Long approverId, String comment, String rejectReason);
+    Result<Void> reject(RejectRequestDTO dto);
 }

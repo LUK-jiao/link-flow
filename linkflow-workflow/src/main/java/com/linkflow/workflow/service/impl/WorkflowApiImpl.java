@@ -2,6 +2,8 @@ package com.linkflow.workflow.service.impl;
 
 import com.linkflow.api.WorkflowApi;
 import com.linkflow.api.dto.common.Result;
+import com.linkflow.api.dto.workflow.ApprovalRequestDTO;
+import com.linkflow.api.dto.workflow.RejectRequestDTO;
 import com.linkflow.api.dto.workflow.WorkflowStartDTO;
 import com.linkflow.api.dto.workflow.WorkflowStatusDTO;
 import com.linkflow.workflow.service.ApproverService;
@@ -159,51 +161,52 @@ public class WorkflowApiImpl implements WorkflowApi {
     }
 
     @Override
-    public Result<Void> approve(String processInstanceId, String taskId, Long approverId, String approverName,String comment) {
-        log.info("com.linkflow.workflow.service.impl.WorkflowApiImpl#approve 审批通过, processInstanceId={}, taskId={}, approverId={}, comment={}",
-                processInstanceId, taskId, approverId, comment);
+    public Result<Void> approve(ApprovalRequestDTO dto) {
+        log.info("com.linkflow.workflow.service.impl.WorkflowApiImpl#approve 审批通过, processInstanceId={}, taskId={}, approverId={}, approverName={}, comment={}",
+                dto.getProcessInstanceId(), dto.getTaskId(), dto.getApproverId(), dto.getApproverName(), dto.getComment());
 
         try {
             // 设置任务变量
             Map<String, Object> variables = new HashMap<>();
             variables.put("action", "approve");
-            variables.put("comment", comment);
-            variables.put("approverName", approverName);
+            variables.put("comment", dto.getComment());
+            variables.put("approverName", dto.getApproverName());
 
             // 完成任务
-            taskService.complete(taskId, variables);
+            taskService.complete(dto.getTaskId(), variables);
 
             log.info("审批通过成功, processInstanceId={}, taskId={}, approverId={}",
-                    processInstanceId, taskId, approverId);
+                    dto.getProcessInstanceId(), dto.getTaskId(), dto.getApproverId());
             return Result.success();
         } catch (Exception e) {
             log.error("审批通过失败, processInstanceId={}, taskId={}, error={}",
-                    processInstanceId, taskId, e.getMessage(), e);
+                    dto.getProcessInstanceId(), dto.getTaskId(), e.getMessage(), e);
             return Result.fail("审批通过失败: " + e.getMessage());
         }
     }
 
     @Override
-    public Result<Void> reject(String processInstanceId, String taskId, String approverName,Long approverId, String comment, String rejectReason) {
-        log.info("com.linkflow.workflow.service.impl.WorkflowApiImpl#reject 审批拒绝, processInstanceId={}, taskId={}, approverId={}, comment={}, rejectReason={}",
-                processInstanceId, taskId, approverId, comment, rejectReason);
+    public Result<Void> reject(RejectRequestDTO dto) {
+        log.info("com.linkflow.workflow.service.impl.WorkflowApiImpl#reject 审批拒绝, processInstanceId={}, taskId={}, approverId={}, approverName={}, comment={}, rejectReason={}",
+                dto.getProcessInstanceId(), dto.getTaskId(), dto.getApproverId(), dto.getApproverName(), dto.getComment(), dto.getRejectReason());
 
         try {
             // 设置任务变量
             Map<String, Object> variables = new HashMap<>();
             variables.put("action", "reject");
-            variables.put("comment", comment);
-            variables.put("rejectReason", rejectReason);
+            variables.put("comment", dto.getComment());
+            variables.put("rejectReason", dto.getRejectReason());
+            variables.put("approverName", dto.getApproverName());
 
             // 完成任务
-            taskService.complete(taskId, variables);
+            taskService.complete(dto.getTaskId(), variables);
 
             log.info("审批拒绝成功, processInstanceId={}, taskId={}, approverId={}",
-                    processInstanceId, taskId, approverId);
+                    dto.getProcessInstanceId(), dto.getTaskId(), dto.getApproverId());
             return Result.success();
         } catch (Exception e) {
             log.error("审批拒绝失败, processInstanceId={}, taskId={}, error={}",
-                    processInstanceId, taskId, e.getMessage(), e);
+                    dto.getProcessInstanceId(), dto.getTaskId(), e.getMessage(), e);
             return Result.fail("审批拒绝失败: " + e.getMessage());
         }
     }
