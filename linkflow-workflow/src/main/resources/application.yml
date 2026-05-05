@@ -5,20 +5,10 @@ spring:
   application:
     name: linkflow-workflow
   datasource:
-    flowable:
-      jdbc-url: jdbc:mysql://localhost:3306/linkflow_flowable?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-      username: root
-      password: 123456
-      driver-class-name: com.mysql.cj.jdbc.Driver
-    business:
-      jdbc-url: jdbc:mysql://localhost:3306/short_link_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
-      username: root
-      password: 123456
-      driver-class-name: com.mysql.cj.jdbc.Driver
-
-mybatis:
-  mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.linkflow.workflow.model
+    url: jdbc:mysql://localhost:3306/short_link_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 flowable:
   database-schema-update: true
@@ -27,6 +17,16 @@ flowable:
   process-definition-location-prefix: classpath:/processes/
   process-definition-location-suffixes:
     - "**.bpmn20.xml"
+  datasource:
+    jdbc-url: jdbc:mysql://localhost:3306/linkflow_flowable?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.linkflow.workflow.model
+
 
 dubbo:
   application:

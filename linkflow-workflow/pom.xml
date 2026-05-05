@@ -18,16 +18,11 @@
     </properties>
 
     <dependencies>
-        <!-- Flowable 核心（排除默认数据源自动配置） -->
+        <!-- Flowable BPMN Process Engine -->
         <dependency>
             <groupId>org.flowable</groupId>
-            <artifactId>flowable-spring-boot-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-jdbc</artifactId>
-                </exclusion>
-            </exclusions>
+            <artifactId>flowable-spring-boot-starter-process</artifactId>
+            <version>${flowable.version}</version>
         </dependency>
 
         <!-- API 模块 -->
