@@ -1,13 +1,19 @@
-package com.linkflow.campaign.service;
+package com.linkflow.campaign.service.impl;
 
+import com.alibaba.fastjson2.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.linkflow.api.CampaignApi;
-import com.linkflow.api.WorkflowApi;
 import com.linkflow.api.dto.campaign.*;
+import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
+import com.linkflow.api.dto.user.UserDTO;
 import com.linkflow.api.dto.workflow.WorkflowStartDTO;
 import com.linkflow.campaign.mapper.CampaignMapper;
 import com.linkflow.campaign.model.Campaign;
-import org.apache.dubbo.config.annotation.DubboReference;
+import com.linkflow.campaign.service.UserAndWorkflowService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +28,26 @@ import java.util.stream.Collectors;
  */
 @DubboService
 @Service
-public class CampaignServiceImpl implements CampaignApi {
+@Slf4j
+public class CampaignApiImpl implements CampaignApi {
 
     @Autowired
     private CampaignMapper campaignMapper;
 
-    @DubboReference(check = false)
-    private WorkflowApi workflowApi;
+    @Autowired
+    private UserAndWorkflowService userAndWorkflowService;
 
     @Override
     public Result<Long> createCampaign(CampaignCreateDTO dto) {
+        if (dto.getCreatorUserId() == null) {
+            return Result.fail("创建人ID不能为空");
+        }
+
+        Result<UserDTO> userResult = userAndWorkflowService.getUserById(dto.getCreatorUserId());
+        if (userResult == null || !userResult.isSuccess() || userResult.getData() == null) {
+            return Result.fail("创建人不存在");
+        }
+
         Campaign campaign = new Campaign();
         BeanUtils.copyProperties(dto, campaign);
         campaign.setStatus("DRAFT");
@@ -54,19 +70,39 @@ public class CampaignServiceImpl implements CampaignApi {
     }
 
     @Override
-    public Result<List<CampaignDTO>> getCampaignList(CampaignQueryDTO query) {
-        // TODO: 实现分页查询，当前返回全部
-        List<Campaign> campaigns = campaignMapper.selectAll();
-        
-        // 按条件过滤
-        List<CampaignDTO> dtos = campaigns.stream()
-                .filter(c -> query.getCreatorUserId() == null || c.getCreatorUserId().equals(query.getCreatorUserId()))
-                .filter(c -> query.getCampaignType() == null || c.getCampaignType().equals(query.getCampaignType()))
-                .filter(c -> query.getStatus() == null || c.getStatus().equals(query.getStatus()))
+    public Result<PageResult<CampaignDTO>> getCampaignList(CampaignQueryDTO query) {
+        log.info("get campaign list,CampaignQueryDto =  {}", JSON.toJSONString(query));
+        Page<Campaign> page = new Page<>(query.getPageNum(),  query.getPageSize());
+        QueryWrapper<Campaign> queryWrapper = new QueryWrapper<>();
+        if(query.getCreatorUserId() != null ) {
+            queryWrapper.eq("creator_user_id", query.getCreatorUserId());
+        }
+        if(query.getStatus() != null) {
+            queryWrapper.eq("status", query.getStatus());
+        }
+        if(query.getCampaignType() != null) {
+            queryWrapper.eq("campaign_type", query.getCampaignType());
+        }
+        IPage<Campaign> res;
+        try{
+            res = campaignMapper.selectPage(page,queryWrapper);
+        }catch (Exception e){
+            log.error("get campaign list error", e);
+            throw new RuntimeException("get campaign list error");
+        }
+
+        List<CampaignDTO> campaignDTOList = res.getRecords().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-        
-        return Result.success(dtos);
+
+        PageResult<CampaignDTO> pageResult = new PageResult<>();
+        pageResult.setRecords(campaignDTOList);
+        pageResult.setTotal(res.getTotal());
+        pageResult.setPageNum(res.getCurrent());
+        pageResult.setPageSize(res.getSize());
+        pageResult.setPages(res.getPages());
+
+        return Result.success(pageResult);
     }
 
     @Override
@@ -92,12 +128,12 @@ public class CampaignServiceImpl implements CampaignApi {
         workflowDTO.setCampaignType(campaign.getCampaignType());
         workflowDTO.setInitiatorId(campaign.getCreatorUserId());
         
-        Result<String> workflowResult = workflowApi.startApprovalProcess(workflowDTO);
-        if (workflowResult.getCode() != 200) {
+        Result<String> workflowResult = userAndWorkflowService.startApprovalProcess(workflowDTO);
+        if (workflowResult == null || !workflowResult.isSuccess()) {
             // 回滚状态
             campaign.setStatus("DRAFT");
             campaignMapper.updateByPrimaryKey(campaign);
-            return Result.fail("启动审批流程失败: " + workflowResult.getMessage());
+            return Result.fail("启动审批流程失败: " + (workflowResult != null ? workflowResult.getMessage() : "远程调用无响应"));
         }
         
         return Result.success();
@@ -131,8 +167,7 @@ public class CampaignServiceImpl implements CampaignApi {
             return Result.fail("活动不存在");
         }
         
-        // TODO: 实际应该有 shortCode 字段，当前 Model 没有
-        // 这里假设 Campaign 表有 short_code 字段，需要后续补充
+        campaign.setShortCode(shortCode);
         campaign.setUpdateTime(new Date());
         campaignMapper.updateByPrimaryKey(campaign);
         

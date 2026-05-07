@@ -54,6 +54,8 @@ CREATE TABLE IF NOT EXISTS campaign (
     end_time DATETIME COMMENT '活动结束时间',
     budget DECIMAL(12,2) COMMENT '预算',
     reject_reason VARCHAR(500) COMMENT '拒绝原因',
+    short_code VARCHAR(100) COMMENT '短链码',
+    long_url VARCHAR(500) COMMENT '长链接',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_creator_user_id (creator_user_id),

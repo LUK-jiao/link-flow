@@ -12,6 +12,8 @@
     <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
     <result column="budget" jdbcType="DECIMAL" property="budget" />
     <result column="reject_reason" jdbcType="VARCHAR" property="rejectReason" />
+    <result column="short_code" jdbcType="VARCHAR" property="shortCode" />
+    <result column="long_url" jdbcType="VARCHAR" property="longUrl" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
@@ -23,12 +25,13 @@
     insert into short_link_db.campaign (name, description,
       campaign_type, status, creator_user_id,
       start_time, end_time, budget,
-      reject_reason, create_time, update_time
+      reject_reason, short_code, long_url, create_time, update_time
       )
     values (#{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR},
       #{campaignType,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{creatorUserId,jdbcType=BIGINT},
       #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{budget,jdbcType=DECIMAL},
-      #{rejectReason,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      #{rejectReason,jdbcType=VARCHAR}, #{shortCode,jdbcType=VARCHAR}, #{longUrl,jdbcType=VARCHAR},
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
       )
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.linkflow.campaign.model.Campaign">
@@ -42,19 +45,21 @@
       end_time = #{endTime,jdbcType=TIMESTAMP},
       budget = #{budget,jdbcType=DECIMAL},
       reject_reason = #{rejectReason,jdbcType=VARCHAR},
+      short_code = #{shortCode,jdbcType=VARCHAR},
+      long_url = #{longUrl,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select id, name, description, campaign_type, status, creator_user_id, start_time, 
-    end_time, budget, reject_reason, create_time, update_time
+    end_time, budget, reject_reason, short_code, long_url, create_time, update_time
     from short_link_db.campaign
     where id = #{id,jdbcType=BIGINT}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
     select id, name, description, campaign_type, status, creator_user_id, start_time, 
-    end_time, budget, reject_reason, create_time, update_time
+    end_time, budget, reject_reason, short_code, long_url, create_time, update_time
     from short_link_db.campaign
   </select>
 </mapper>

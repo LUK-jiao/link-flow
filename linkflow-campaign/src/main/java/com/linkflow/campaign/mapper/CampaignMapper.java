@@ -1,12 +1,13 @@
 package com.linkflow.campaign.mapper;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.linkflow.campaign.model.Campaign;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
 @Mapper
-public interface CampaignMapper {
+public interface CampaignMapper extends BaseMapper<Campaign> {
     int deleteByPrimaryKey(Long id);
 
     int insert(Campaign row);

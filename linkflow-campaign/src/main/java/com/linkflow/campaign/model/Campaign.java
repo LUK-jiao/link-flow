@@ -27,6 +27,10 @@ public class Campaign {
 
     private String rejectReason;
 
+    private String shortCode;
+
+    private String longUrl;
+
     private Date createTime;
 
     private Date updateTime;
