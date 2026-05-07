@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8083
 
 spring:
   application:
@@ -38,7 +38,7 @@ dubbo:
       namespace: linkflow
   protocol:
     name: dubbo
-    port: 20882
+    port: 20883
   scan:
     base-packages: com.linkflow.workflow.service
 

@@ -15,7 +15,7 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   
-  <insert id="insert" parameterType="com.linkflow.user.model.ApproverConfig">
+  <insert id="insert" parameterType="com.linkflow.user.model.ApproverConfig" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
     insert into short_link_db.approver_config (campaign_type, approver_id, 
       approver_level, create_time, update_time
       )

@@ -18,7 +18,7 @@
     where id = #{id,jdbcType=BIGINT}
   </delete>
   
-  <insert id="insert" parameterType="com.linkflow.user.model.User">
+  <insert id="insert" parameterType="com.linkflow.user.model.User" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
     insert into short_link_db.user (username, password, 
       email, phone, role, 
       status, create_time, update_time

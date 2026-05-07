@@ -30,12 +30,12 @@ CREATE TABLE IF NOT EXISTS user (
 CREATE TABLE IF NOT EXISTS approver_config (
     id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '配置ID',
     campaign_type VARCHAR(50) NOT NULL COMMENT '活动类型',
-    approver_user_id BIGINT NOT NULL COMMENT '审批人用户ID',
+    approver_id BIGINT NOT NULL COMMENT '审批人用户ID',
     approver_level INT NOT NULL DEFAULT 1 COMMENT '审批级别：1-一级审批，2-二级审批',
     create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     INDEX idx_campaign_type (campaign_type),
-    INDEX idx_approver_user_id (approver_user_id)
+    INDEX idx_approver_id (approver_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='审批人配置表';
 
 -- ===========================================

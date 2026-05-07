@@ -2,6 +2,7 @@ package com.linkflow.user.mapper;
 
 import com.linkflow.user.model.ApproverConfig;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -20,5 +21,6 @@ public interface ApproverConfigMapper {
     /**
      * 根据活动类型和审批级别查询
      */
-    List<ApproverConfig> selectByTypeAndLevel(String campaignType, Integer level);
+    List<ApproverConfig> selectByTypeAndLevel(@Param("campaignType") String campaignType,
+                                              @Param("approverLevel") Integer level);
 }
