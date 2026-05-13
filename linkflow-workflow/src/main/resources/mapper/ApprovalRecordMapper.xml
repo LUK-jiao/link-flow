@@ -40,7 +40,7 @@
 
     <select id="selectAll" resultMap="BaseResultMap">
         SELECT id, campaign_id, process_instance_id, task_id, task_name,
-               approver_id, approver_name, action, comment,reject_reason approve_time, create_time
+               approver_id, approver_name, action, comment, reject_reason, approve_time, create_time
         FROM approval_record
     </select>
 

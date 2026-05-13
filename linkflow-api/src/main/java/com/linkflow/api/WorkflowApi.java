@@ -1,9 +1,7 @@
 package com.linkflow.api;
 
-import com.linkflow.api.dto.workflow.ApprovalRequestDTO;
-import com.linkflow.api.dto.workflow.RejectRequestDTO;
-import com.linkflow.api.dto.workflow.WorkflowStartDTO;
-import com.linkflow.api.dto.workflow.WorkflowStatusDTO;
+import com.linkflow.api.dto.common.PageResult;
+import com.linkflow.api.dto.workflow.*;
 import com.linkflow.api.dto.common.Result;
 
 /**
@@ -20,6 +18,8 @@ public interface WorkflowApi {
      * 查询流程状态
      */
     Result<WorkflowStatusDTO> getProcessStatus(String processInstanceId);
+
+    Result<PageResult<WorkflowTaskDTO>> getPendingTasks(WorkflowTaskQueryDTO query);
 
     /**
      * 根据业务键查询流程状态

@@ -35,14 +35,14 @@ public class Level1ApprovalListener implements TaskListener {
 
         // 3. 获取审批人信息
         Long approverId = parseLong(delegateTask.getAssignee());
-        String approverName = (String) delegateTask.getVariableLocal("approverName");
+        String approverName = (String) delegateTask.getVariable("approverName");
         if (approverName == null || approverName.isBlank()) {
             approverName = delegateTask.getAssignee();
         }
 
         // 4. 获取审批结果和意见（前端提交的表单变量）
-        String action = normalizeAction((String) delegateTask.getVariableLocal("action"));
-        String comment = (String) delegateTask.getVariableLocal("comment");
+        String action = normalizeAction((String) delegateTask.getVariable("action"));
+        String comment = (String) delegateTask.getVariable("comment");
 
         // 5. 设置流程变量（用于网关判断流程走向和多实例提前终止）
         boolean isApproved = "approve".equals(action);

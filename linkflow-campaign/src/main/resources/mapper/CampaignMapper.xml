@@ -21,7 +21,7 @@
     delete from short_link_db.campaign
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.linkflow.campaign.model.Campaign">
+  <insert id="insert" parameterType="com.linkflow.campaign.model.Campaign" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
     insert into short_link_db.campaign (name, description,
       campaign_type, status, creator_user_id,
       start_time, end_time, budget,

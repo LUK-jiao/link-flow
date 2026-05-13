@@ -13,7 +13,7 @@
         <userTask id="level1Approval" name="一级审批" flowable:assignee="${approver}">
             <extensionElements>
                 <flowable:taskListener event="complete"
-                                       class="com.linkflow.workflow.listener.Level1ApprovalListener"/>
+                                       delegateExpression="${level1ApprovalListener}"/><!-- 监听器用于处理审批结果，更新approval_record -->
             </extensionElements>
             <multiInstanceLoopCharacteristics flowable:collection="${level1Approvers}" flowable:elementVariable="approver">
                 <completionCondition>${nrOfCompletedInstances >= 1 || level1Approved == false}</completionCondition>
@@ -27,7 +27,7 @@
         <userTask id="level2Approval" name="二级审批" flowable:assignee="${approver}">
             <extensionElements>
                 <flowable:taskListener event="complete"
-                                       class="com.linkflow.workflow.listener.Level2ApprovalListener"/>
+                                       delegateExpression="${level2ApprovalListener}"/>
             </extensionElements>
             <multiInstanceLoopCharacteristics flowable:collection="${level2Approvers}" flowable:elementVariable="approver">
                 <completionCondition>${nrOfCompletedInstances >= 1 || level2Approved == false}</completionCondition>
@@ -65,7 +65,7 @@
         <sequenceFlow sourceRef="level2Approval" targetRef="gateway2"/>
 
         <sequenceFlow sourceRef="gateway2" targetRef="callbackApproved" name="通过">
-            <conditionExpression xsi:type="tFormalExpression">${level2Approved }</conditionExpression>
+            <conditionExpression xsi:type="tFormalExpression">${level2Approved}</conditionExpression>
         </sequenceFlow>
 
         <sequenceFlow sourceRef="gateway2" targetRef="callbackRejected" name="拒绝">

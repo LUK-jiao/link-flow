@@ -1,11 +1,9 @@
 package com.linkflow.workflow.service.impl;
 
 import com.linkflow.api.WorkflowApi;
+import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
-import com.linkflow.api.dto.workflow.ApprovalRequestDTO;
-import com.linkflow.api.dto.workflow.RejectRequestDTO;
-import com.linkflow.api.dto.workflow.WorkflowStartDTO;
-import com.linkflow.api.dto.workflow.WorkflowStatusDTO;
+import com.linkflow.api.dto.workflow.*;
 import com.linkflow.workflow.service.ApproverService;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RuntimeService;
@@ -14,6 +12,7 @@ import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
+import org.flowable.task.api.TaskQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,8 @@ import org.apache.dubbo.config.annotation.DubboService;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @DubboService
@@ -63,6 +64,7 @@ public class WorkflowApiImpl implements WorkflowApi {
             variables.put("level1Approvers", level1Approvers);
             variables.put("level2Approvers", level2Approvers);
             variables.put("initiatorId", dto.getInitiatorId());
+            variables.put("businessType", dto.getBusinessType());
             variables.put("campaignType", dto.getCampaignType());
 
             // 启动流程
@@ -111,6 +113,53 @@ public class WorkflowApiImpl implements WorkflowApi {
         } catch (Exception e) {
             log.error("查询流程状态失败, processInstanceId={}, error={}", processInstanceId, e.getMessage(), e);
             return Result.fail("查询流程状态失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<PageResult<WorkflowTaskDTO>> getPendingTasks(WorkflowTaskQueryDTO query) {
+        log.info("com.linkflow.workflow.service.impl.WorkflowApiImpl#getPendingTasks 查询待审批任务, approverId={}, businessType={}, campaignType={}, taskDefinitionKey={}, pageNum={}, pageSize={}",
+                query != null ? query.getApproverId() : null,
+                query != null ? query.getBusinessType() : null,
+                query != null ? query.getCampaignType() : null,
+                query != null ? query.getTaskDefinitionKey() : null,
+                query != null ? query.getPageNum() : null,
+                query != null ? query.getPageSize() : null);
+
+        if (query == null || query.getApproverId() == null) {
+            return Result.fail(400, "审批人ID不能为空");
+        }
+
+        try {
+            int pageNum = normalizePageNum(query.getPageNum());
+            int pageSize = normalizePageSize(query.getPageSize());
+            int firstResult = (pageNum - 1) * pageSize;
+
+            TaskQuery taskQuery = buildPendingTaskQuery(query);
+            long total = taskQuery.count();
+
+            List<Task> tasks = buildPendingTaskQuery(query)
+                    .orderByTaskCreateTime()
+                    .desc()
+                    .listPage(firstResult, pageSize);
+
+            List<WorkflowTaskDTO> records = tasks.stream()
+                    .map(this::convertToTaskDTO)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            PageResult<WorkflowTaskDTO> pageResult = new PageResult<>();
+            pageResult.setRecords(records);
+            pageResult.setTotal(total);
+            pageResult.setPageNum((long) pageNum);
+            pageResult.setPageSize((long) pageSize);
+            pageResult.setPages((total + pageSize - 1) / pageSize);
+
+            return Result.success(pageResult);
+        } catch (Exception e) {
+            log.error("查询待审批任务失败, approverId={}, error={}",
+                    query.getApproverId(), e.getMessage(), e);
+            return Result.fail("查询待审批任务失败: " + e.getMessage());
         }
     }
 
@@ -218,6 +267,62 @@ public class WorkflowApiImpl implements WorkflowApi {
                     dto.getProcessInstanceId(), dto.getTaskId(), e.getMessage(), e);
             return Result.fail("审批拒绝失败: " + e.getMessage());
         }
+    }
+
+    private TaskQuery buildPendingTaskQuery(WorkflowTaskQueryDTO query) {
+        TaskQuery taskQuery = taskService.createTaskQuery()
+                .taskAssignee(String.valueOf(query.getApproverId()))
+                .active();
+
+        if (hasText(query.getBusinessType())) {
+            taskQuery.processVariableValueEquals("businessType", query.getBusinessType());
+        }
+        if (hasText(query.getCampaignType())) {
+            taskQuery.processVariableValueEquals("campaignType", query.getCampaignType());
+        }
+        if (hasText(query.getTaskDefinitionKey())) {
+            taskQuery.taskDefinitionKey(query.getTaskDefinitionKey());
+        }
+
+        return taskQuery;
+    }
+
+    private WorkflowTaskDTO convertToTaskDTO(Task task) {
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(task.getProcessInstanceId())
+                .singleResult();
+        if (processInstance == null) {
+            log.warn("待办任务对应的流程实例不存在, taskId={}, processInstanceId={}",
+                    task.getId(), task.getProcessInstanceId());
+            return null;
+        }
+
+        WorkflowTaskDTO dto = new WorkflowTaskDTO();
+        dto.setTaskId(task.getId());
+        dto.setTaskName(task.getName());
+        dto.setTaskDefinitionKey(task.getTaskDefinitionKey());
+        dto.setProcessInstanceId(task.getProcessInstanceId());
+        dto.setBusinessKey(Long.valueOf(processInstance.getBusinessKey()));
+        dto.setApproverId(Long.valueOf(task.getAssignee()));
+        dto.setCreateTime(task.getCreateTime());
+        dto.setBusinessType((String) runtimeService.getVariable(task.getProcessInstanceId(), "businessType"));
+        dto.setCampaignType((String) runtimeService.getVariable(task.getProcessInstanceId(), "campaignType"));
+        return dto;
+    }
+
+    private int normalizePageNum(Integer pageNum) {
+        return pageNum == null || pageNum < 1 ? 1 : pageNum;
+    }
+
+    private int normalizePageSize(Integer pageSize) {
+        if (pageSize == null || pageSize < 1) {
+            return 10;
+        }
+        return Math.min(pageSize, 100);
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     /**
