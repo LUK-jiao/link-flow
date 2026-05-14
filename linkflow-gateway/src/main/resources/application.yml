@@ -1,10 +1,12 @@
 server:
-  port: 8080
+  port: 8088
 
 spring:
   application:
     name: linkflow-gateway
   cloud:
+    compatibility-verifier:
+      enabled: false
     nacos:
       discovery:
         server-addr: localhost:8848
@@ -24,7 +26,7 @@ spring:
         - id: linkflow-user
           uri: lb://linkflow-user
           predicates:
-            - Path=/api/user/**
+            - Path=/proxy/user/**
           filters:
             - StripPrefix=1
 
@@ -32,7 +34,7 @@ spring:
         - id: linkflow-campaign
           uri: lb://linkflow-campaign
           predicates:
-            - Path=/api/campaign/**
+            - Path=/proxy/campaign/**
           filters:
             - StripPrefix=1
 
@@ -40,9 +42,26 @@ spring:
         - id: linkflow-workflow
           uri: lb://linkflow-workflow
           predicates:
-            - Path=/api/workflow/**
+            - Path=/proxy/workflow/**
           filters:
             - StripPrefix=1
+
+dubbo:
+  application:
+    name: linkflow-gateway
+    qos-enable: false
+  registry:
+    address: nacos://localhost:8848
+    parameters:
+      namespace: linkflow
+  protocol:
+    port: -1
+  consumer:
+    check: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
 
 # 日志配置
 logging:
