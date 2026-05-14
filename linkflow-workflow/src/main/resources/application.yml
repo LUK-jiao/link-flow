@@ -39,6 +39,7 @@ dubbo:
   protocol:
     name: dubbo
     port: 20883
+    host: localhost
   scan:
     base-packages: com.linkflow.workflow.service
 

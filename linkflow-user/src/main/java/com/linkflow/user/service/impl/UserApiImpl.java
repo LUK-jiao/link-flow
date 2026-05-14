@@ -25,13 +25,8 @@ public class UserApiImpl implements UserApi {
 
     @Override
     public Result<Long> createUser(UserCreateDTO dto) {
-        // 检查用户名是否已存在
-        User existingUser = userMapper.selectAll()
-                .stream()
-                .filter(u -> u.getUsername().equals(dto.getUsername()))
-                .findFirst()
-                .orElse(null);
-
+        // 检查用户名是否已存在（避免全表扫描）
+        User existingUser = userMapper.selectByUsername(dto.getUsername());
         if (existingUser != null) {
             return Result.fail("用户名已存在");
         }
@@ -60,11 +55,7 @@ public class UserApiImpl implements UserApi {
 
     @Override
     public Result<UserDTO> getUserByUsername(String username) {
-        User user = userMapper.selectAll()
-                .stream()
-                .filter(u -> u.getUsername().equals(username))
-                .findFirst()
-                .orElse(null);
+        User user = userMapper.selectByUsername(username);
 
         if (user == null) {
             return Result.fail("用户不存在");

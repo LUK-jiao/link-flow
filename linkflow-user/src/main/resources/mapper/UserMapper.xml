@@ -47,6 +47,13 @@
     from short_link_db.user
     where id = #{id,jdbcType=BIGINT}
   </select>
+
+  <select id="selectByUsername" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select id, username, password, email, phone, role, status, create_time, update_time
+    from short_link_db.user
+    where username = #{username,jdbcType=VARCHAR}
+    limit 1
+  </select>
   
   <select id="selectAll" resultMap="BaseResultMap">
     select id, username, password, email, phone, role, status, create_time, update_time

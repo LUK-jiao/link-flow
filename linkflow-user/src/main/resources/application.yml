@@ -26,5 +26,7 @@ dubbo:
   protocol:
     name: dubbo
     port: 20882
+    host: 127.0.0.1
+  ip.to.bind: 127.0.0.1
   scan:
     base-packages: com.linkflow.user.service

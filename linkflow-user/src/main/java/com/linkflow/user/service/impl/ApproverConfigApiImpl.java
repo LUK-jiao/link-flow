@@ -53,7 +53,7 @@ public class ApproverConfigApiImpl implements ApproverConfigApi {
 
     @Override
     public Result<Long> configApprover(ApproverDTO dto) {
-        // 检查审批人是否存在
+        // 检查要配置的审批人是否存在
         User approver = userMapper.selectByPrimaryKey(dto.getApproverId());
         if (approver == null) {
             return Result.fail("审批人不存在");

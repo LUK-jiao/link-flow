@@ -26,5 +26,6 @@ dubbo:
   protocol:
     name: dubbo
     port: 20884
+    host: 127.0.0.1
   scan:
     base-packages: com.linkflow.campaign.service
