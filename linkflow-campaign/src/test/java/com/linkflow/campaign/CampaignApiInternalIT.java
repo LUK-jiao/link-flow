@@ -9,6 +9,10 @@ import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
 import com.linkflow.api.dto.user.UserDTO;
 import com.linkflow.api.dto.workflow.WorkflowStartDTO;
+import com.linkflow.campaign.mapper.CampaignMapper;
+import com.linkflow.campaign.model.Campaign;
+import com.linkflow.campaign.service.CampaignApprovedEventPublisher;
+import com.linkflow.campaign.service.ShortLinkGatewayService;
 import com.linkflow.campaign.service.UserAndWorkflowService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +28,9 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @Transactional
@@ -33,8 +40,10 @@ import static org.mockito.Mockito.when;
         properties = {
                 "spring.main.web-application-type=none",
                 "dubbo.registry.address=N/A",
-                "dubbo.protocol.port=-1",
-                "dubbo.application.qos-enable=false"
+                "dubbo.protocol.port=0",
+                "dubbo.application.qos-enable=false",
+                "spring.kafka.listener.auto-startup=false",
+                "linkflow.campaign.shortlink.enabled=false"
         }
 )
 class CampaignApiInternalIT {
@@ -42,8 +51,17 @@ class CampaignApiInternalIT {
     @Autowired
     private CampaignApi campaignApi;
 
+    @Autowired
+    private CampaignMapper campaignMapper;
+
     @MockitoBean
     private UserAndWorkflowService userAndWorkflowService;
+
+    @MockitoBean
+    private CampaignApprovedEventPublisher campaignApprovedEventPublisher;
+
+    @MockitoBean
+    private ShortLinkGatewayService shortLinkGatewayService;
 
     @BeforeEach
     void setUp() {
@@ -99,6 +117,7 @@ class CampaignApiInternalIT {
         CampaignDTO rejectedCampaign = campaignApi.getCampaignById(campaignId).getData();
         assertThat(rejectedCampaign.getStatus()).isEqualTo("REJECTED");
         assertThat(rejectedCampaign.getRejectReason()).isEqualTo("预算不足");
+        verify(campaignApprovedEventPublisher, never()).publish(any());
     }
 
     @Test
@@ -113,6 +132,65 @@ class CampaignApiInternalIT {
         assertThat(cancelResult.isSuccess()).isTrue();
         assertThat(campaignApi.getCampaignById(cancelCampaignId).getData().getStatus())
                 .isEqualTo("CANCELLED");
+    }
+
+    @Test
+    void updateCampaignStatusApproved_shouldPublishEvent() {
+        Long campaignId = createCampaign("approved-event");
+
+        Result<Void> submitResult = campaignApi.submitCampaign(campaignId);
+        assertThat(submitResult.isSuccess()).isTrue();
+
+        CampaignStatusUpdateDTO statusUpdateDTO = new CampaignStatusUpdateDTO();
+        statusUpdateDTO.setCampaignId(campaignId);
+        statusUpdateDTO.setStatus("APPROVED");
+
+        Result<Void> updateStatusResult = campaignApi.updateCampaignStatus(statusUpdateDTO);
+        assertThat(updateStatusResult.isSuccess()).isTrue();
+        assertThat(campaignApi.getCampaignById(campaignId).getData().getStatus()).isEqualTo("APPROVED");
+
+        verify(campaignApprovedEventPublisher).publish(argThat(event ->
+                event != null
+                        && campaignId.equals(event.getCampaignId())
+                        && event.getLongUrl() != null
+                        && event.getLongUrl().contains("https://example.com/approved-event")
+        ));
+    }
+
+    @Test
+    void createCampaignWithoutLongUrl_shouldFail() {
+        CampaignCreateDTO createDTO = new CampaignCreateDTO();
+        createDTO.setName(uniqueName("campaign-no-url"));
+        createDTO.setDescription("missing long url");
+        createDTO.setCampaignType(uniqueName("MARKETING"));
+        createDTO.setCreatorUserId(10001L);
+        createDTO.setStartTime(new Date(System.currentTimeMillis() + 3_600_000));
+        createDTO.setEndTime(new Date(System.currentTimeMillis() + 7_200_000));
+        createDTO.setBudget(new BigDecimal("1000.00"));
+        createDTO.setLongUrl("   ");
+
+        Result<Long> createResult = campaignApi.createCampaign(createDTO);
+        assertThat(createResult.isSuccess()).isFalse();
+        assertThat(createResult.getMessage()).contains("长链接");
+    }
+
+    @Test
+    void updateShortCodeIfEmpty_shouldBeIdempotent() {
+        Long campaignId = createCampaign("idempotent-short-code");
+
+        assertThat(campaignApi.submitCampaign(campaignId).isSuccess()).isTrue();
+        CampaignStatusUpdateDTO statusUpdateDTO = new CampaignStatusUpdateDTO();
+        statusUpdateDTO.setCampaignId(campaignId);
+        statusUpdateDTO.setStatus("APPROVED");
+        assertThat(campaignApi.updateCampaignStatus(statusUpdateDTO).isSuccess()).isTrue();
+
+        int first = campaignMapper.updateShortCodeIfEmpty(campaignId, "short-code-once", new Date());
+        int second = campaignMapper.updateShortCodeIfEmpty(campaignId, "short-code-twice", new Date());
+        assertThat(first).isEqualTo(1);
+        assertThat(second).isEqualTo(0);
+
+        Campaign campaign = campaignMapper.selectByPrimaryKey(campaignId);
+        assertThat(campaign.getShortCode()).isEqualTo("short-code-once");
     }
 
     private Long createCampaign(String suffix) {

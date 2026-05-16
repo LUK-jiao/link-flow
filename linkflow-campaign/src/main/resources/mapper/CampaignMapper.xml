@@ -51,6 +51,14 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
   </update>
+  <update id="updateShortCodeIfEmpty">
+    update short_link_db.campaign
+    set short_code = #{shortCode,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{campaignId,jdbcType=BIGINT}
+      and status = 'APPROVED'
+      and (short_code is null or short_code = '')
+  </update>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select id, name, description, campaign_type, status, creator_user_id, start_time, 
     end_time, budget, reject_reason, short_code, long_url, create_time, update_time

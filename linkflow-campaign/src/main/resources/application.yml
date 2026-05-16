@@ -9,6 +9,18 @@ spring:
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    listener:
+      ack-mode: record
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -26,6 +38,13 @@ dubbo:
   protocol:
     name: dubbo
     port: 20884
-    host: 127.0.0.1
+    host: ${DUBBO_HOST:10.250.246.71}
   scan:
     base-packages: com.linkflow.campaign.service
+
+linkflow:
+  campaign:
+    kafka:
+      topics:
+        campaign-approved: campaign.approved
+      consumer-group: linkflow-campaign-shortlink

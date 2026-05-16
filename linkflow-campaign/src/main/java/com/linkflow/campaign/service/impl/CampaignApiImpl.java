@@ -10,14 +10,17 @@ import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
 import com.linkflow.api.dto.user.UserDTO;
 import com.linkflow.api.dto.workflow.WorkflowStartDTO;
+import com.linkflow.campaign.event.CampaignApprovedEvent;
 import com.linkflow.campaign.mapper.CampaignMapper;
 import com.linkflow.campaign.model.Campaign;
+import com.linkflow.campaign.service.CampaignApprovedEventPublisher;
 import com.linkflow.campaign.service.UserAndWorkflowService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -37,10 +40,16 @@ public class CampaignApiImpl implements CampaignApi {
     @Autowired
     private UserAndWorkflowService userAndWorkflowService;
 
+    @Autowired
+    private CampaignApprovedEventPublisher campaignApprovedEventPublisher;
+
     @Override
     public Result<Long> createCampaign(CampaignCreateDTO dto) {
         if (dto.getCreatorUserId() == null) {
             return Result.fail("创建人ID不能为空");
+        }
+        if (dto.getLongUrl() == null || dto.getLongUrl().isBlank()) {
+            return Result.fail("长链接不能为空");
         }
 
         Result<UserDTO> userResult = userAndWorkflowService.getUserById(dto.getCreatorUserId());
@@ -140,23 +149,44 @@ public class CampaignApiImpl implements CampaignApi {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> updateCampaignStatus(CampaignStatusUpdateDTO dto) {
+        if (dto == null || dto.getCampaignId() == null || dto.getStatus() == null || dto.getStatus().isBlank()) {
+            return Result.fail("活动状态更新参数不完整");
+        }
+
         Campaign campaign = campaignMapper.selectByPrimaryKey(dto.getCampaignId());
         if (campaign == null) {
             return Result.fail("活动不存在");
         }
-        
+
         if (!"APPROVING".equals(campaign.getStatus())) {
             return Result.fail("只有审批中的活动可以更新状态");
         }
-        
+
+        if (!"APPROVED".equals(dto.getStatus()) && !"REJECTED".equals(dto.getStatus())) {
+            return Result.fail("仅支持更新为 APPROVED 或 REJECTED");
+        }
+
+        if ("APPROVED".equals(dto.getStatus()) && (campaign.getLongUrl() == null || campaign.getLongUrl().isBlank())) {
+            return Result.fail("活动长链接为空，无法完成审批通过回调");
+        }
+
         campaign.setStatus(dto.getStatus());
         if ("REJECTED".equals(dto.getStatus())) {
             campaign.setRejectReason(dto.getRejectReason());
         }
         campaign.setUpdateTime(new Date());
-        
+
         campaignMapper.updateByPrimaryKey(campaign);
+
+        if ("APPROVED".equals(dto.getStatus())) {
+            CampaignApprovedEvent event = new CampaignApprovedEvent();
+            event.setCampaignId(campaign.getId());
+            event.setLongUrl(campaign.getLongUrl());
+            campaignApprovedEventPublisher.publish(event);
+        }
+
         return Result.success();
     }
 
