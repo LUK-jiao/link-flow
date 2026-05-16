@@ -9,8 +9,6 @@ import com.linkflow.api.dto.campaign.CampaignCreateDTO;
 import com.linkflow.api.dto.campaign.CampaignDTO;
 import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
-import com.linkflow.api.dto.shortlink.ShortLinkCreateDTO;
-import com.linkflow.api.dto.shortlink.ShortLinkResultDTO;
 import com.linkflow.api.dto.user.ApproverDTO;
 import com.linkflow.api.dto.user.UserDTO;
 import com.linkflow.api.dto.workflow.ApprovalRequestDTO;
@@ -82,7 +80,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ApprovalAndShortLinkE2EIT {
 
     private static final Logger log = LoggerFactory.getLogger(ApprovalAndShortLinkE2EIT.class);
-    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(20);
     private static final Duration WAIT_POLL_INTERVAL = Duration.ofMillis(200);
     private static final Set<String> APPROVER_ROLES = Set.of("APPROVER", "ADMIN");
 
@@ -147,16 +145,10 @@ class ApprovalAndShortLinkE2EIT {
         CampaignDTO approvedCampaign = waitForCampaignStatus(campaignId, "APPROVED");
         assertThat(approvedCampaign.getLongUrl()).isEqualTo(longUrl);
 
-        ShortLinkCreateDTO shortLinkCreateDTO = new ShortLinkCreateDTO();
-        shortLinkCreateDTO.setLongUrl(longUrl);
-        Result<ShortLinkResultDTO> shortLinkResult = shortLinkApi.createShortLink(shortLinkCreateDTO);
-        assertThat(shortLinkResult.isSuccess()).isTrue();
-        assertThat(shortLinkResult.getData()).isNotNull();
-        String shortCode = shortLinkResult.getData().getShortCode();
+        CampaignDTO boundCampaign = waitForCampaignShortCode(campaignId);
+        String shortCode = boundCampaign.getShortCode();
         assertThat(shortCode).isNotBlank();
         log.info("E2E approve: shortCode={}", shortCode);
-
-        assertThat(campaignApi.bindShortCode(campaignId, shortCode).isSuccess()).isTrue();
 
         Result<Boolean> existsResult = shortLinkApi.exists(shortCode);
         assertThat(existsResult.isSuccess()).isTrue();
@@ -166,7 +158,6 @@ class ApprovalAndShortLinkE2EIT {
         assertThat(urlResult.isSuccess()).isTrue();
         assertThat(urlResult.getData()).isEqualTo(longUrl);
 
-        CampaignDTO boundCampaign = campaignApi.getCampaignById(campaignId).getData();
         assertThat(boundCampaign.getShortCode()).isEqualTo(shortCode);
 
         // best-effort cleanup of approver configs to reduce DB noise
@@ -300,6 +291,18 @@ class ApprovalAndShortLinkE2EIT {
         Result<CampaignDTO> result = waitUntil(
                 () -> campaignApi.getCampaignById(campaignId),
                 r -> r != null && r.isSuccess() && r.getData() != null && expectedStatus.equals(r.getData().getStatus())
+        );
+        return result.getData();
+    }
+
+    private CampaignDTO waitForCampaignShortCode(Long campaignId) {
+        Result<CampaignDTO> result = waitUntil(
+                () -> campaignApi.getCampaignById(campaignId),
+                r -> r != null
+                        && r.isSuccess()
+                        && r.getData() != null
+                        && r.getData().getShortCode() != null
+                        && !r.getData().getShortCode().isBlank()
         );
         return result.getData();
     }

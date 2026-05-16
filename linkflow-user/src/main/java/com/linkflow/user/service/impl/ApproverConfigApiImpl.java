@@ -66,7 +66,7 @@ public class ApproverConfigApiImpl implements ApproverConfigApi {
 
         ApproverConfig config = new ApproverConfig();
         config.setCampaignType(dto.getCampaignType());
-        config.setApproverId(dto.getApproverId());
+        config.setApproverId(dto.getApproverId());//这里其实应该对应的是userId
         config.setApproverLevel(dto.getApproverLevel() != null ? dto.getApproverLevel() : 1);
         config.setCreateTime(new Date());
         config.setUpdateTime(new Date());
