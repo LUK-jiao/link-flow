@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ShortLinkGatewayServiceImpl implements ShortLinkGatewayService {
 
-    @DubboReference(check = false)
+    @DubboReference(check = false,timeout = 3000,retries = 0)
     private ShortLinkApi shortLinkApi;
 
     @Override

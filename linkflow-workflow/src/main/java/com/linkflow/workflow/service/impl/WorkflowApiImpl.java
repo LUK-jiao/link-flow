@@ -216,7 +216,7 @@ public class WorkflowApiImpl implements WorkflowApi {
                 dto.getProcessInstanceId(), dto.getTaskId(), dto.getApproverId(), dto.getApproverName(), dto.getComment());
 
         try {
-            Result<Void> validation = validatePendingTask(dto.getTaskId(), dto.getProcessInstanceId());
+            Result<Void> validation = validatePendingTask(dto.getTaskId(), dto.getProcessInstanceId(), dto.getApproverId());
             if (validation != null) {
                 return validation;
             }
@@ -245,7 +245,7 @@ public class WorkflowApiImpl implements WorkflowApi {
                 dto.getProcessInstanceId(), dto.getTaskId(), dto.getApproverId(), dto.getApproverName(), dto.getComment(), dto.getRejectReason());
 
         try {
-            Result<Void> validation = validatePendingTask(dto.getTaskId(), dto.getProcessInstanceId());
+            Result<Void> validation = validatePendingTask(dto.getTaskId(), dto.getProcessInstanceId(), dto.getApproverId());
             if (validation != null) {
                 return validation;
             }
@@ -384,7 +384,7 @@ public class WorkflowApiImpl implements WorkflowApi {
         return dto;
     }
 
-    private Result<Void> validatePendingTask(String taskId, String processInstanceId) {
+    private Result<Void> validatePendingTask(String taskId, String processInstanceId,Long approverId) {
         Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
         if (task == null) {
             log.warn("任务不存在或已处理, taskId={}", taskId);
@@ -394,6 +394,10 @@ public class WorkflowApiImpl implements WorkflowApi {
             log.warn("任务与流程实例不匹配, taskId={}, requestProcessInstanceId={}, actualProcessInstanceId={}",
                     taskId, processInstanceId, task.getProcessInstanceId());
             return Result.fail(400, "任务与流程实例不匹配");
+        }
+        if(approverId == null || !approverId.equals(Long.valueOf(task.getAssignee()))) {
+            log.warn("任务指定审批人和当前任务提交的审批人不一致，请重新提交，approverId={}, task.assignee={}", approverId, task.getAssignee());
+            return Result.fail(401,"审批人不一致，请检查后重新提交");
         }
         return null;
     }
