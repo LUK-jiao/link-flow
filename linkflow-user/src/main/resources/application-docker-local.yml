@@ -1,0 +1,31 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: linkflow-user
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://host.docker.internal:3306/short_link_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.linkflow.user.model
+
+dubbo:
+  application:
+    name: linkflow-user
+    qos-enable: false
+  registry:
+    address: nacos://nacos:8848
+    parameters:
+      namespace: linkflow
+  protocol:
+    name: dubbo
+    port: 20882
+    host: ${DUBBO_IP_TO_BIND:linkflow-user}
+  ip.to.bind: ${DUBBO_IP_TO_BIND:linkflow-user}
+  scan:
+    base-packages: com.linkflow.user.service

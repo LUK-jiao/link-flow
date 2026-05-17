@@ -1,0 +1,64 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: linkflow-gateway
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    nacos:
+      discovery:
+        server-addr: nacos:8848
+        namespace: linkflow
+      config:
+        server-addr: nacos:8848
+        namespace: linkflow
+        file-extension: yml
+        enabled: false
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: linkflow-user
+          uri: lb://linkflow-user
+          predicates:
+            - Path=/proxy/user/**
+          filters:
+            - StripPrefix=1
+        - id: linkflow-campaign
+          uri: lb://linkflow-campaign
+          predicates:
+            - Path=/proxy/campaign/**
+          filters:
+            - StripPrefix=1
+        - id: linkflow-workflow
+          uri: lb://linkflow-workflow
+          predicates:
+            - Path=/proxy/workflow/**
+          filters:
+            - StripPrefix=1
+
+dubbo:
+  application:
+    name: linkflow-gateway
+    qos-enable: false
+  registry:
+    address: nacos://nacos:8848
+    parameters:
+      namespace: linkflow
+  protocol:
+    port: -1
+  consumer:
+    check: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.linkflow: debug
+    org.springframework.cloud.gateway: debug
