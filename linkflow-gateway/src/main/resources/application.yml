@@ -63,6 +63,12 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+linkflow:
+  auth:
+    jwt:
+      secret: ${LINKFLOW_JWT_SECRET:linkflow-local-development-secret-key-2026}
+      expire-minutes: ${LINKFLOW_JWT_EXPIRE_MINUTES:120}
+
 # 日志配置
 logging:
   level:

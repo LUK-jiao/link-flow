@@ -2,12 +2,19 @@ package com.linkflow.api;
 
 import com.linkflow.api.dto.user.UserDTO;
 import com.linkflow.api.dto.user.UserCreateDTO;
+import com.linkflow.api.dto.user.UserLoginDTO;
+import com.linkflow.api.dto.user.UserLoginResultDTO;
 import com.linkflow.api.dto.common.Result;
 
 /**
  * User 服务接口
  */
 public interface UserApi {
+
+    /**
+     * 用户登录
+     */
+    Result<UserLoginResultDTO> login(UserLoginDTO dto);
 
     /**
      * 创建用户

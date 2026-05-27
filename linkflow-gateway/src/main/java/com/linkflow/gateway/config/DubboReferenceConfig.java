@@ -1,6 +1,7 @@
 package com.linkflow.gateway.config;
 
 import com.linkflow.api.ApproverConfigApi;
+import com.linkflow.api.AgentApi;
 import com.linkflow.api.CampaignApi;
 import com.linkflow.api.ShortLinkApi;
 import com.linkflow.api.UserApi;
@@ -12,6 +13,12 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class DubboReferenceConfig {
+
+    @Bean
+    @DubboReference(interfaceClass = AgentApi.class, check = false)
+    public ReferenceBean<AgentApi> agentApi() {
+        return new ReferenceBean<>();
+    }
 
     @Bean
     @DubboReference(interfaceClass = UserApi.class, check = false)
