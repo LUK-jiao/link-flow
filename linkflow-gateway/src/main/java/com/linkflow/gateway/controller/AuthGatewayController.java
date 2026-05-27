@@ -2,6 +2,8 @@ package com.linkflow.gateway.controller;
 
 import com.linkflow.api.UserApi;
 import com.linkflow.api.dto.common.Result;
+import com.linkflow.api.dto.user.UserCreateDTO;
+import com.linkflow.api.dto.user.UserDTO;
 import com.linkflow.api.dto.user.UserLoginDTO;
 import com.linkflow.api.dto.user.UserLoginResultDTO;
 import com.linkflow.gateway.auth.JwtTokenService;
@@ -32,6 +34,35 @@ public class AuthGatewayController {
         AuthLoginResponse response = new AuthLoginResponse(
                 token,
                 user.getUserId(),
+                user.getUsername(),
+                user.getRole()
+        );
+        return Result.success(response);
+    }
+
+    @PostMapping("/register")
+    public Result<AuthLoginResponse> register(@RequestBody UserCreateDTO dto) {
+        Result<Long> createResult = userApi.createUser(dto);
+        if (!createResult.isSuccess()) {
+            return Result.fail(createResult.getCode(), createResult.getMessage());
+        }
+
+        Result<UserDTO> userResult = userApi.getUserByUsername(dto.getUsername());
+        if (!userResult.isSuccess() || userResult.getData() == null) {
+            return Result.fail(userResult.getCode(), userResult.getMessage());
+        }
+
+        UserDTO user = userResult.getData();
+        UserLoginResultDTO loginResultDTO = new UserLoginResultDTO();
+        loginResultDTO.setUserId(user.getId());
+        loginResultDTO.setUsername(user.getUsername());
+        loginResultDTO.setRole(user.getRole());
+        loginResultDTO.setStatus(user.getStatus());
+
+        String token = jwtTokenService.generateToken(loginResultDTO);
+        AuthLoginResponse response = new AuthLoginResponse(
+                token,
+                user.getId(),
                 user.getUsername(),
                 user.getRole()
         );

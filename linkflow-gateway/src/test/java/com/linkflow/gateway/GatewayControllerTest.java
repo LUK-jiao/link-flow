@@ -14,6 +14,8 @@ import com.linkflow.api.dto.common.Result;
 import com.linkflow.api.dto.user.UserLoginDTO;
 import com.linkflow.api.dto.user.UserLoginResultDTO;
 import com.linkflow.api.dto.workflow.ApprovalRequestDTO;
+import com.linkflow.api.dto.user.UserCreateDTO;
+import com.linkflow.api.dto.user.UserDTO;
 import com.linkflow.gateway.auth.JwtTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -232,6 +234,53 @@ class GatewayControllerTest {
         assertThat(command.getUsername()).isEqualTo("alice");
         assertThat(command.getRole()).isEqualTo("USER");
         assertThat(command.getMessage()).isEqualTo("hello");
+    }
+
+    @Test
+    void register_shouldReturnTokenWhenCreateSucceeds() {
+        when(userApi.createUser(any(UserCreateDTO.class))).thenReturn(Result.success(11L));
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(11L);
+        userDTO.setUsername("new-user");
+        userDTO.setRole("USER");
+        userDTO.setStatus((byte) 1);
+        when(userApi.getUserByUsername(eq("new-user"))).thenReturn(Result.success(userDTO));
+
+        webTestClient.post()
+                .uri("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(Map.of(
+                        "username", "new-user",
+                        "password", "123456",
+                        "email", "new-user@example.com",
+                        "phone", "13800000000"
+                ))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.code").isEqualTo(200)
+                .jsonPath("$.data.token").exists()
+                .jsonPath("$.data.userId").isEqualTo(11)
+                .jsonPath("$.data.username").isEqualTo("new-user")
+                .jsonPath("$.data.role").isEqualTo("USER");
+    }
+
+    @Test
+    void register_shouldReturnErrorWhenCreateFails() {
+        when(userApi.createUser(any(UserCreateDTO.class))).thenReturn(Result.fail(400, "用户名已存在"));
+
+        webTestClient.post()
+                .uri("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(Map.of(
+                        "username", "exists",
+                        "password", "123456"
+                ))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.code").isEqualTo(400)
+                .jsonPath("$.data.token").doesNotExist();
     }
 
     private String testToken() {
