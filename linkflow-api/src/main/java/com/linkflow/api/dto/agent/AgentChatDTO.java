@@ -16,4 +16,14 @@ public class AgentChatDTO implements Serializable {
     private String type;
 
     private String text;
+
+    private String actionId;
+
+    private String actionType;
+
+    private String intent;
+
+    private Object extractedSlots;
+
+    private Object missingSlots;
 }
