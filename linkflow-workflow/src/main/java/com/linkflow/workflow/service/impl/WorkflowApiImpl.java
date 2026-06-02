@@ -4,6 +4,7 @@ import com.linkflow.api.WorkflowApi;
 import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
 import com.linkflow.api.dto.workflow.*;
+import com.linkflow.api.enums.CampaignTypeEnum;
 import com.linkflow.workflow.service.ApproverService;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RuntimeService;
@@ -50,12 +51,16 @@ public class WorkflowApiImpl implements WorkflowApi {
                 dto.getBusinessKey(), dto.getBusinessType(), dto.getCampaignType(), dto.getInitiatorId());
 
         try {
+            CampaignTypeEnum campaignType = CampaignTypeEnum.ofCode(dto.getCampaignType());
+            if (campaignType == null) {
+                return Result.fail("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+            }
             // 获取审批人列表
-            List<Long> level1Approvers = approverService.getApproverIds(dto.getCampaignType(), 1);
-            List<Long> level2Approvers = approverService.getApproverIds(dto.getCampaignType(), 2);
+            List<Long> level1Approvers = approverService.getApproverIds(campaignType.getCode(), 1);
+            List<Long> level2Approvers = approverService.getApproverIds(campaignType.getCode(), 2);
 
             if (level1Approvers.isEmpty()) {
-                log.error("一级审批人为空, campaignType={}", dto.getCampaignType());
+                log.error("一级审批人为空, campaignType={}", campaignType.getCode());
                 return Result.fail("一级审批人配置为空");
             }
 
@@ -65,7 +70,7 @@ public class WorkflowApiImpl implements WorkflowApi {
             variables.put("level2Approvers", level2Approvers);
             variables.put("initiatorId", dto.getInitiatorId());
             variables.put("businessType", dto.getBusinessType());
-            variables.put("campaignType", dto.getCampaignType());
+            variables.put("campaignType", campaignType.getCode());
 
             // 启动流程
             ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(
@@ -128,6 +133,9 @@ public class WorkflowApiImpl implements WorkflowApi {
 
         if (query == null || query.getApproverId() == null) {
             return Result.fail(400, "审批人ID不能为空");
+        }
+        if (hasText(query.getCampaignType()) && !CampaignTypeEnum.isValid(query.getCampaignType())) {
+            return Result.fail(400, "活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
         }
 
         try {
@@ -278,7 +286,7 @@ public class WorkflowApiImpl implements WorkflowApi {
             taskQuery.processVariableValueEquals("businessType", query.getBusinessType());
         }
         if (hasText(query.getCampaignType())) {
-            taskQuery.processVariableValueEquals("campaignType", query.getCampaignType());
+            taskQuery.processVariableValueEquals("campaignType", CampaignTypeEnum.ofCode(query.getCampaignType()).getCode());
         }
         if (hasText(query.getTaskDefinitionKey())) {
             taskQuery.taskDefinitionKey(query.getTaskDefinitionKey());
@@ -335,17 +343,25 @@ public class WorkflowApiImpl implements WorkflowApi {
         dto.setStatus("RUNNING");
         dto.setStartTime(processInstance.getStartTime());
 
-        // 查询当前任务
-        Task currentTask = taskService.createTaskQuery()
+        // 多审批人场景会同时存在多条当前任务，不能用 singleResult。
+        List<Task> currentTasks = taskService.createTaskQuery()
                 .processInstanceId(processInstance.getId())
-                .singleResult();
+                .list();
 
-        if (currentTask != null) {
-            dto.setCurrentTask(currentTask.getName());
-            dto.setCurrentAssignee(currentTask.getAssignee());
+        if (!currentTasks.isEmpty()) {
+            dto.setCurrentTask(joinDistinct(currentTasks.stream().map(Task::getName).collect(Collectors.toList())));
+            dto.setCurrentAssignee(joinDistinct(currentTasks.stream().map(Task::getAssignee).collect(Collectors.toList())));
         }
 
         return dto;
+    }
+
+    private String joinDistinct(List<String> values) {
+        String joined = values.stream()
+                .filter(this::hasText)
+                .distinct()
+                .collect(Collectors.joining(","));
+        return joined.isBlank() ? null : joined;
     }
 
     /**

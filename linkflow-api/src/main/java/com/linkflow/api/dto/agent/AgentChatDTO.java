@@ -28,4 +28,8 @@ public class AgentChatDTO implements Serializable {
     private Object extractedSlots;
 
     private Object missingSlots;
+
+    private AgentApprovalProgressDTO approvalProgress;
+
+    private Object campaignCandidates;
 }

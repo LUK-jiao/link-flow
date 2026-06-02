@@ -20,7 +20,7 @@ public class WorkflowTaskQueryDTO implements Serializable {
     private String businessType;
 
     /**
-     * 活动类型，例如 MARKETING / PROMOTION / EVENT
+     * 活动类型，取值见 com.linkflow.api.enums.CampaignTypeEnum
      */
     private String campaignType;
 

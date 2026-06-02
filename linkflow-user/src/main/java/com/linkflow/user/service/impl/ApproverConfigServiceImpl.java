@@ -1,5 +1,6 @@
 package com.linkflow.user.service.impl;
 
+import com.linkflow.api.enums.CampaignTypeEnum;
 import com.linkflow.user.dto.ApproverConfigDTO;
 import com.linkflow.user.mapper.ApproverConfigMapper;
 import com.linkflow.user.mapper.UserMapper;
@@ -24,6 +25,10 @@ public class ApproverConfigServiceImpl implements ApproverConfigService {
 
     @Override
     public Long configApprover(ApproverConfigDTO dto) {
+        CampaignTypeEnum campaignType = CampaignTypeEnum.ofCode(dto.getCampaignType());
+        if (campaignType == null) {
+            throw new RuntimeException("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+        }
         // 检查审批人是否存在
         User approver = userMapper.selectByPrimaryKey(dto.getApproverId());
         if (approver == null) {
@@ -36,7 +41,7 @@ public class ApproverConfigServiceImpl implements ApproverConfigService {
         }
 
         ApproverConfig config = new ApproverConfig();
-        config.setCampaignType(dto.getCampaignType());
+        config.setCampaignType(campaignType.getCode());
         config.setApproverId(dto.getApproverId());
         config.setApproverLevel(dto.getApproverLevel() != null ? dto.getApproverLevel() : 1);
 
@@ -46,14 +51,22 @@ public class ApproverConfigServiceImpl implements ApproverConfigService {
 
     @Override
     public List<ApproverConfig> getByCampaignType(String campaignType) {
+        CampaignTypeEnum type = CampaignTypeEnum.ofCode(campaignType);
+        if (type == null) {
+            throw new RuntimeException("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+        }
         return approverConfigMapper.selectAll()
                 .stream()
-                .filter(c -> c.getCampaignType().equals(campaignType))
+                .filter(c -> type == CampaignTypeEnum.ofCode(c.getCampaignType()))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<ApproverConfig> getByCampaignTypeAndLevel(String campaignType, Integer level) {
-        return approverConfigMapper.selectByTypeAndLevel(campaignType, level);
+        CampaignTypeEnum type = CampaignTypeEnum.ofCode(campaignType);
+        if (type == null) {
+            throw new RuntimeException("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+        }
+        return approverConfigMapper.selectByTypeAndLevel(type.getCode(), level);
     }
 }

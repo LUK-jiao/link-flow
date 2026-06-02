@@ -18,7 +18,12 @@ public class CampaignQueryDTO implements Serializable {
     private Long creatorUserId;
 
     /**
-     * 活动类型
+     * 活动名称，支持模糊查询
+     */
+    private String name;
+
+    /**
+     * 活动类型，取值见 com.linkflow.api.enums.CampaignTypeEnum
      */
     private String campaignType;
 

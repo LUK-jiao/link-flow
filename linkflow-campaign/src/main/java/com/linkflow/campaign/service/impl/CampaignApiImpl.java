@@ -10,6 +10,7 @@ import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
 import com.linkflow.api.dto.user.UserDTO;
 import com.linkflow.api.dto.workflow.WorkflowStartDTO;
+import com.linkflow.api.enums.CampaignTypeEnum;
 import com.linkflow.campaign.event.CampaignApprovedEvent;
 import com.linkflow.campaign.mapper.CampaignMapper;
 import com.linkflow.campaign.model.Campaign;
@@ -21,9 +22,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +38,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class CampaignApiImpl implements CampaignApi {
+
+    private static final Pattern NAME_TOKEN_PATTERN = Pattern.compile("[A-Za-z0-9]+|[\\u4e00-\\u9fa5]+");
 
     @Autowired
     private CampaignMapper campaignMapper;
@@ -45,6 +52,10 @@ public class CampaignApiImpl implements CampaignApi {
 
     @Override
     public Result<Long> createCampaign(CampaignCreateDTO dto) {
+        CampaignTypeEnum campaignType = CampaignTypeEnum.ofCode(dto.getCampaignType());
+        if (campaignType == null) {
+            return Result.fail("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+        }
         if (dto.getCreatorUserId() == null) {
             return Result.fail("创建人ID不能为空");
         }
@@ -59,6 +70,7 @@ public class CampaignApiImpl implements CampaignApi {
 
         Campaign campaign = new Campaign();
         BeanUtils.copyProperties(dto, campaign);
+        campaign.setCampaignType(campaignType.getCode());
         campaign.setStatus("DRAFT");
         campaign.setCreateTime(new Date());
         campaign.setUpdateTime(new Date());
@@ -86,12 +98,20 @@ public class CampaignApiImpl implements CampaignApi {
         if(query.getCreatorUserId() != null ) {
             queryWrapper.eq("creator_user_id", query.getCreatorUserId());
         }
+        if(StringUtils.hasText(query.getName())) {
+            applyNameQuery(queryWrapper, query.getName());
+        }
         if(query.getStatus() != null) {
             queryWrapper.eq("status", query.getStatus());
         }
-        if(query.getCampaignType() != null) {
-            queryWrapper.eq("campaign_type", query.getCampaignType());
+        if(StringUtils.hasText(query.getCampaignType())) {
+            CampaignTypeEnum campaignType = CampaignTypeEnum.ofCode(query.getCampaignType());
+            if (campaignType == null) {
+                return Result.fail("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+            }
+            queryWrapper.eq("campaign_type", campaignType.getCode());
         }
+        queryWrapper.orderByDesc("create_time", "id");
         IPage<Campaign> res;
         try{
             res = campaignMapper.selectPage(page,queryWrapper);
@@ -112,6 +132,33 @@ public class CampaignApiImpl implements CampaignApi {
         pageResult.setPages(res.getPages());
 
         return Result.success(pageResult);
+    }
+
+    private void applyNameQuery(QueryWrapper<Campaign> queryWrapper, String name) {
+        List<String> tokens = extractNameTokens(name);
+        if (tokens.isEmpty()) {
+            queryWrapper.like("name", name.trim());
+            return;
+        }
+        queryWrapper.and(wrapper -> {
+            for (String token : tokens) {
+                wrapper.like("name", token);
+            }
+        });
+    }
+
+    private List<String> extractNameTokens(String name) {
+        String normalized = name == null ? "" : name.trim()
+                .replaceFirst("^(我创建的|我参与的|我审批的|创建的|参与的|审批的)", "");
+        Matcher matcher = NAME_TOKEN_PATTERN.matcher(normalized);
+        List<String> tokens = new ArrayList<>();
+        while (matcher.find()) {
+            String token = matcher.group().trim();
+            if (StringUtils.hasText(token) && !"活动".equals(token)) {
+                tokens.add(token);
+            }
+        }
+        return tokens;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.linkflow.user.service.impl;
 import com.linkflow.api.ApproverConfigApi;
 import com.linkflow.api.dto.common.Result;
 import com.linkflow.api.dto.user.ApproverDTO;
+import com.linkflow.api.enums.CampaignTypeEnum;
 import com.linkflow.user.mapper.ApproverConfigMapper;
 import com.linkflow.user.mapper.UserMapper;
 import com.linkflow.user.model.ApproverConfig;
@@ -30,9 +31,13 @@ public class ApproverConfigApiImpl implements ApproverConfigApi {
 
     @Override
     public Result<List<ApproverDTO>> getApproverByType(String campaignType) {
+        CampaignTypeEnum type = CampaignTypeEnum.ofCode(campaignType);
+        if (type == null) {
+            return Result.fail("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+        }
         List<ApproverConfig> configs = approverConfigMapper.selectAll()
                 .stream()
-                .filter(c -> c.getCampaignType().equals(campaignType))
+                .filter(c -> type == CampaignTypeEnum.ofCode(c.getCampaignType()))
                 .collect(Collectors.toList());
 
         List<ApproverDTO> dtos = configs.stream()
@@ -44,7 +49,11 @@ public class ApproverConfigApiImpl implements ApproverConfigApi {
 
     @Override
     public Result<List<ApproverDTO>> getApproverByTypeAndLevel(String campaignType, Integer level) {
-        List<ApproverConfig> configs = approverConfigMapper.selectByTypeAndLevel(campaignType, level);
+        CampaignTypeEnum type = CampaignTypeEnum.ofCode(campaignType);
+        if (type == null) {
+            return Result.fail("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+        }
+        List<ApproverConfig> configs = approverConfigMapper.selectByTypeAndLevel(type.getCode(), level);
         List<ApproverDTO> dtos = configs.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -53,6 +62,10 @@ public class ApproverConfigApiImpl implements ApproverConfigApi {
 
     @Override
     public Result<Long> configApprover(ApproverDTO dto) {
+        CampaignTypeEnum type = CampaignTypeEnum.ofCode(dto.getCampaignType());
+        if (type == null) {
+            return Result.fail("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+        }
         // 检查要配置的审批人是否存在
         User approver = userMapper.selectByPrimaryKey(dto.getApproverId());
         if (approver == null) {
@@ -65,7 +78,7 @@ public class ApproverConfigApiImpl implements ApproverConfigApi {
         }
 
         ApproverConfig config = new ApproverConfig();
-        config.setCampaignType(dto.getCampaignType());
+        config.setCampaignType(type.getCode());
         config.setApproverId(dto.getApproverId());//这里其实应该对应的是userId
         config.setApproverLevel(dto.getApproverLevel() != null ? dto.getApproverLevel() : 1);
         config.setCreateTime(new Date());

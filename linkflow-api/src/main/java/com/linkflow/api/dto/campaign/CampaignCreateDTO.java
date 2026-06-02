@@ -25,7 +25,7 @@ public class CampaignCreateDTO implements Serializable {
     private String description;
 
     /**
-     * 活动类型：MARKETING/PROMOTION/EVENT
+     * 活动类型，取值见 com.linkflow.api.enums.CampaignTypeEnum
      */
     private String campaignType;
 

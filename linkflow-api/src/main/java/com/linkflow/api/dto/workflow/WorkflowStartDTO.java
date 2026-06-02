@@ -23,7 +23,7 @@ public class WorkflowStartDTO implements Serializable {
     private String businessType;
 
     /**
-     * 活动类型（用于查找审批人）
+     * 活动类型，取值见 com.linkflow.api.enums.CampaignTypeEnum
      */
     private String campaignType;
 

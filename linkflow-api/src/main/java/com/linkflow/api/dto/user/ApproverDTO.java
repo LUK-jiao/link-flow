@@ -18,7 +18,7 @@ public class ApproverDTO implements Serializable {
     private Long id;
 
     /**
-     * 活动类型
+     * 活动类型，取值见 com.linkflow.api.enums.CampaignTypeEnum
      */
     private String campaignType;
 
