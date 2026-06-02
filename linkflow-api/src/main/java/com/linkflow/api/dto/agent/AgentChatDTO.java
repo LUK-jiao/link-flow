@@ -13,6 +13,8 @@ public class AgentChatDTO implements Serializable {
 
     private String messageId;
 
+    private String assistantMessageId;
+
     private String type;
 
     private String text;

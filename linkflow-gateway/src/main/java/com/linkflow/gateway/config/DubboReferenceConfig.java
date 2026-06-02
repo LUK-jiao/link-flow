@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class DubboReferenceConfig {
 
     @Bean
-    @DubboReference(interfaceClass = AgentApi.class, check = false)
+    @DubboReference(interfaceClass = AgentApi.class, check = false, timeout = 180000, retries = 0)
     public ReferenceBean<AgentApi> agentApi() {
         return new ReferenceBean<>();
     }

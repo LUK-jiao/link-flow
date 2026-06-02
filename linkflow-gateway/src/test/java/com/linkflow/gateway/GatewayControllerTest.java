@@ -6,6 +6,8 @@ import com.linkflow.api.CampaignApi;
 import com.linkflow.api.ShortLinkApi;
 import com.linkflow.api.UserApi;
 import com.linkflow.api.WorkflowApi;
+import com.linkflow.api.dto.agent.AgentActionConfirmCommand;
+import com.linkflow.api.dto.agent.AgentActionConfirmDTO;
 import com.linkflow.api.dto.agent.AgentChatDTO;
 import com.linkflow.api.dto.agent.AgentChatCommand;
 import com.linkflow.api.dto.campaign.CampaignDTO;
@@ -45,6 +47,8 @@ import static org.mockito.Mockito.when;
                 "dubbo.protocol.port=-1",
                 "dubbo.application.qos-enable=false",
                 "spring.cloud.compatibility-verifier.enabled=false",
+                "spring.cloud.nacos.discovery.enabled=false",
+                "spring.cloud.service-registry.auto-registration.enabled=false",
                 "linkflow.auth.jwt.secret=linkflow-gateway-test-secret-key-2026",
                 "linkflow.auth.jwt.expire-minutes=120"
         }
@@ -206,6 +210,7 @@ class GatewayControllerTest {
         AgentChatDTO dto = new AgentChatDTO();
         dto.setSessionId("sess_1");
         dto.setMessageId("msg_1");
+        dto.setAssistantMessageId("msg_2");
         dto.setType("TEXT");
         dto.setText("ok");
         when(agentApi.chat(any(AgentChatCommand.class))).thenReturn(Result.success(dto));
@@ -225,7 +230,8 @@ class GatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.code").isEqualTo(200)
                 .jsonPath("$.data.sessionId").isEqualTo("sess_1")
-                .jsonPath("$.data.messageId").isEqualTo("msg_1");
+                .jsonPath("$.data.messageId").isEqualTo("msg_1")
+                .jsonPath("$.data.assistantMessageId").isEqualTo("msg_2");
 
         ArgumentCaptor<AgentChatCommand> commandCaptor = ArgumentCaptor.forClass(AgentChatCommand.class);
         verify(agentApi).chat(commandCaptor.capture());
@@ -234,6 +240,43 @@ class GatewayControllerTest {
         assertThat(command.getUsername()).isEqualTo("alice");
         assertThat(command.getRole()).isEqualTo("USER");
         assertThat(command.getMessage()).isEqualTo("hello");
+    }
+
+    @Test
+    void agentConfirmAction_shouldCallAgentApiWithCurrentUserFromTokenAndOverwriteForgedHeaders() {
+        AgentActionConfirmDTO dto = new AgentActionConfirmDTO();
+        dto.setActionId("act_1");
+        dto.setStatus("SUCCESS");
+        dto.setResultText("ok");
+        dto.setCampaignId(1001L);
+        when(agentApi.confirmAction(any(AgentActionConfirmCommand.class))).thenReturn(Result.success(dto));
+
+        webTestClient.post()
+                .uri("/api/agent/actions/confirm")
+                .headers(headers -> {
+                    headers.setBearerAuth(testToken());
+                    headers.add("X-User-Id", "999");
+                    headers.add("X-Username", "forged");
+                    headers.add("X-User-Role", "ADMIN");
+                })
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(Map.of("actionId", "act_1", "confirmed", true))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.code").isEqualTo(200)
+                .jsonPath("$.data.actionId").isEqualTo("act_1")
+                .jsonPath("$.data.status").isEqualTo("SUCCESS")
+                .jsonPath("$.data.campaignId").isEqualTo(1001);
+
+        ArgumentCaptor<AgentActionConfirmCommand> commandCaptor = ArgumentCaptor.forClass(AgentActionConfirmCommand.class);
+        verify(agentApi).confirmAction(commandCaptor.capture());
+        AgentActionConfirmCommand command = commandCaptor.getValue();
+        assertThat(command.getUserId()).isEqualTo(7L);
+        assertThat(command.getUsername()).isEqualTo("alice");
+        assertThat(command.getRole()).isEqualTo("USER");
+        assertThat(command.getActionId()).isEqualTo("act_1");
+        assertThat(command.getConfirmed()).isTrue();
     }
 
     @Test
