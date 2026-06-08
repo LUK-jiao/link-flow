@@ -5,6 +5,8 @@ import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
 import com.linkflow.api.dto.workflow.*;
 import com.linkflow.api.enums.CampaignTypeEnum;
+import com.linkflow.workflow.mapper.ApprovalRecordMapper;
+import com.linkflow.workflow.model.ApprovalRecord;
 import com.linkflow.workflow.service.ApproverService;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.RuntimeService;
@@ -44,6 +46,9 @@ public class WorkflowApiImpl implements WorkflowApi {
 
     @Autowired
     private ApproverService approverService;
+
+    @Autowired
+    private ApprovalRecordMapper approvalRecordMapper;
 
     @Override
     public Result<String> startApprovalProcess(WorkflowStartDTO dto) {
@@ -168,6 +173,28 @@ public class WorkflowApiImpl implements WorkflowApi {
             log.error("查询待审批任务失败, approverId={}, error={}",
                     query.getApproverId(), e.getMessage(), e);
             return Result.fail("查询待审批任务失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<List<ApprovalRecordDTO>> getApprovalRecordsByCampaignId(Long campaignId) {
+        log.info("com.linkflow.workflow.service.impl.WorkflowApiImpl#getApprovalRecordsByCampaignId 查询审批记录, campaignId={}",
+                campaignId);
+
+        if (campaignId == null) {
+            return Result.fail(400, "活动ID不能为空");
+        }
+
+        try {
+            // 审批记录只按活动维度做只读查询，权限由上层聚合接口控制。
+            List<ApprovalRecordDTO> records = approvalRecordMapper.selectByCampaignId(campaignId)
+                    .stream()
+                    .map(this::convertToApprovalRecordDTO)
+                    .collect(Collectors.toList());
+            return Result.success(records);
+        } catch (Exception e) {
+            log.error("查询审批记录失败, campaignId={}, error={}", campaignId, e.getMessage(), e);
+            return Result.fail("查询审批记录失败: " + e.getMessage());
         }
     }
 
@@ -315,6 +342,23 @@ public class WorkflowApiImpl implements WorkflowApi {
         dto.setCreateTime(task.getCreateTime());
         dto.setBusinessType((String) runtimeService.getVariable(task.getProcessInstanceId(), "businessType"));
         dto.setCampaignType((String) runtimeService.getVariable(task.getProcessInstanceId(), "campaignType"));
+        return dto;
+    }
+
+    private ApprovalRecordDTO convertToApprovalRecordDTO(ApprovalRecord record) {
+        ApprovalRecordDTO dto = new ApprovalRecordDTO();
+        dto.setId(record.getId());
+        dto.setCampaignId(record.getCampaignId());
+        dto.setProcessInstanceId(record.getProcessInstanceId());
+        dto.setTaskId(record.getTaskId());
+        dto.setTaskName(record.getTaskName());
+        dto.setApproverId(record.getApproverId());
+        dto.setApproverName(record.getApproverName());
+        dto.setAction(record.getAction());
+        dto.setComment(record.getComment());
+        dto.setRejectReason(record.getRejectReason());
+        dto.setApproveTime(record.getApproveTime());
+        dto.setCreateTime(record.getCreateTime());
         return dto;
     }
 

@@ -16,4 +16,6 @@ public interface ApprovalRecordMapper {
     int deleteByPrimaryKey(Long id);
 
     List<ApprovalRecord> selectAll();
+
+    List<ApprovalRecord> selectByCampaignId(Long campaignId);
 }

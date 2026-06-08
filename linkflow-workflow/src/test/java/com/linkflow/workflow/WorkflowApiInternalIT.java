@@ -4,6 +4,7 @@ import com.linkflow.api.WorkflowApi;
 import com.linkflow.api.dto.campaign.CampaignStatusUpdateDTO;
 import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
+import com.linkflow.api.dto.workflow.ApprovalRecordDTO;
 import com.linkflow.api.dto.workflow.ApprovalRequestDTO;
 import com.linkflow.api.dto.workflow.RejectRequestDTO;
 import com.linkflow.api.dto.workflow.WorkflowStartDTO;
@@ -132,6 +133,15 @@ class WorkflowApiInternalIT {
                 .filteredOn(record -> processInstanceId.equals(record.getProcessInstanceId()))
                 .extracting(ApprovalRecord::getAction)
                 .containsExactly("approve", "approve");
+
+        Result<List<ApprovalRecordDTO>> recordResult = workflowApi.getApprovalRecordsByCampaignId(campaignId);
+        assertThat(recordResult.isSuccess()).isTrue();
+        assertThat(recordResult.getData())
+                .extracting(ApprovalRecordDTO::getAction)
+                .containsExactly("approve", "approve");
+        assertThat(recordResult.getData())
+                .extracting(ApprovalRecordDTO::getComment)
+                .containsExactly("一级通过", "二级通过");
     }
 
     @Test
@@ -179,6 +189,25 @@ class WorkflowApiInternalIT {
                     assertThat(record.getAction()).isEqualTo("reject");
                     assertThat(record.getRejectReason()).isEqualTo("预算不通过");
                 });
+
+        Result<List<ApprovalRecordDTO>> recordResult = workflowApi.getApprovalRecordsByCampaignId(campaignId);
+        assertThat(recordResult.isSuccess()).isTrue();
+        assertThat(recordResult.getData())
+                .singleElement()
+                .satisfies(record -> {
+                    assertThat(record.getCampaignId()).isEqualTo(campaignId);
+                    assertThat(record.getAction()).isEqualTo("reject");
+                    assertThat(record.getRejectReason()).isEqualTo("预算不通过");
+                });
+    }
+
+    @Test
+    void getApprovalRecordsShouldRejectNullCampaignId() {
+        Result<List<ApprovalRecordDTO>> result = workflowApi.getApprovalRecordsByCampaignId(null);
+
+        assertThat(result.isSuccess()).isFalse();
+        assertThat(result.getCode()).isEqualTo(400);
+        assertThat(result.getMessage()).isEqualTo("活动ID不能为空");
     }
 
     private WorkflowStartDTO startDTO(Long campaignId, String campaignType) {

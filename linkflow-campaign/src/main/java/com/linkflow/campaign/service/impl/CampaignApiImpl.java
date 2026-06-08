@@ -134,6 +134,67 @@ public class CampaignApiImpl implements CampaignApi {
         return Result.success(pageResult);
     }
 
+    @Override
+    public Result<PageResult<CampaignDTO>> getVisibleCampaignList(CampaignVisibleQueryDTO query) {
+        log.info("get visible campaign list, CampaignVisibleQueryDTO={}", JSON.toJSONString(query));
+        if (query == null || query.getUserId() == null) {
+            return Result.fail(400, "用户ID不能为空");
+        }
+
+        Page<Campaign> page = new Page<>(query.getPageNum(), query.getPageSize());
+        QueryWrapper<Campaign> queryWrapper = new QueryWrapper<>();
+        List<String> approverCampaignTypes = normalizeCampaignTypes(query.getApproverCampaignTypes());
+
+        queryWrapper.and(wrapper -> {
+            wrapper.eq("creator_user_id", query.getUserId());
+            if (!approverCampaignTypes.isEmpty()) {
+                wrapper.or().in("campaign_type", approverCampaignTypes);
+            }
+        });
+        if (StringUtils.hasText(query.getName())) {
+            applyNameQuery(queryWrapper, query.getName());
+        }
+        if (StringUtils.hasText(query.getStatus())) {
+            queryWrapper.eq("status", query.getStatus());
+        }
+        if (StringUtils.hasText(query.getCampaignType())) {
+            CampaignTypeEnum campaignType = CampaignTypeEnum.ofCode(query.getCampaignType());
+            if (campaignType == null) {
+                return Result.fail("活动类型不合法，可选值：" + CampaignTypeEnum.validCodesText());
+            }
+            queryWrapper.eq("campaign_type", campaignType.getCode());
+        }
+        queryWrapper.orderByDesc("create_time", "id");
+
+        IPage<Campaign> res;
+        try {
+            res = campaignMapper.selectPage(page, queryWrapper);
+        } catch (Exception exception) {
+            log.error("get visible campaign list error", exception);
+            throw new RuntimeException("get visible campaign list error");
+        }
+
+        PageResult<CampaignDTO> pageResult = new PageResult<>();
+        pageResult.setRecords(res.getRecords().stream().map(this::convertToDTO).collect(Collectors.toList()));
+        pageResult.setTotal(res.getTotal());
+        pageResult.setPageNum(res.getCurrent());
+        pageResult.setPageSize(res.getSize());
+        pageResult.setPages(res.getPages());
+        return Result.success(pageResult);
+    }
+
+    private List<String> normalizeCampaignTypes(List<String> campaignTypes) {
+        if (campaignTypes == null || campaignTypes.isEmpty()) {
+            return List.of();
+        }
+        return campaignTypes.stream()
+                .map(CampaignTypeEnum::ofCode)
+                .filter(type -> type != null)
+                .map(CampaignTypeEnum::getCode)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     private void applyNameQuery(QueryWrapper<Campaign> queryWrapper, String name) {
         List<String> tokens = extractNameTokens(name);
         if (tokens.isEmpty()) {

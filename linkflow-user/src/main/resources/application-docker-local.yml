@@ -22,6 +22,7 @@ dubbo:
     address: nacos://nacos:8848
     parameters:
       namespace: linkflow
+      register-consumer-url: true
   protocol:
     name: dubbo
     port: 20882

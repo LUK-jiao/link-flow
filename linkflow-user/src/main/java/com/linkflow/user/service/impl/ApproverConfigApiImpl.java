@@ -61,6 +61,18 @@ public class ApproverConfigApiImpl implements ApproverConfigApi {
     }
 
     @Override
+    public Result<List<ApproverDTO>> getApproverByUserId(Long approverId) {
+        if (approverId == null) {
+            return Result.fail(400, "审批人ID不能为空");
+        }
+        List<ApproverConfig> configs = approverConfigMapper.selectByApproverId(approverId);
+        List<ApproverDTO> dtos = configs.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        return Result.success(dtos);
+    }
+
+    @Override
     public Result<Long> configApprover(ApproverDTO dto) {
         CampaignTypeEnum type = CampaignTypeEnum.ofCode(dto.getCampaignType());
         if (type == null) {

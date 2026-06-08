@@ -1,8 +1,10 @@
 package com.linkflow.api.dto.agent;
 
+import com.linkflow.api.dto.workflow.ApprovalRecordDTO;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class AgentChatDTO implements Serializable {
@@ -30,6 +32,10 @@ public class AgentChatDTO implements Serializable {
     private Object missingSlots;
 
     private AgentApprovalProgressDTO approvalProgress;
+
+    private List<AgentApprovalTaskDTO> approvalTasks;
+
+    private List<ApprovalRecordDTO> approvalRecords;
 
     private Object campaignCandidates;
 }

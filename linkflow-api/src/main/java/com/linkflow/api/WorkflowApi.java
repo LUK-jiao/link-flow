@@ -4,6 +4,8 @@ import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.workflow.*;
 import com.linkflow.api.dto.common.Result;
 
+import java.util.List;
+
 /**
  * Workflow 服务接口
  */
@@ -20,6 +22,11 @@ public interface WorkflowApi {
     Result<WorkflowStatusDTO> getProcessStatus(String processInstanceId);
 
     Result<PageResult<WorkflowTaskDTO>> getPendingTasks(WorkflowTaskQueryDTO query);
+
+    /**
+     * 按活动 ID 查询审批记录
+     */
+    Result<List<ApprovalRecordDTO>> getApprovalRecordsByCampaignId(Long campaignId);
 
     /**
      * 根据业务键查询流程状态

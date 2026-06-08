@@ -3,6 +3,7 @@ package com.linkflow.gateway.controller;
 import com.linkflow.api.WorkflowApi;
 import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
+import com.linkflow.api.dto.workflow.ApprovalRecordDTO;
 import com.linkflow.api.dto.workflow.ApprovalRequestDTO;
 import com.linkflow.api.dto.workflow.RejectRequestDTO;
 import com.linkflow.api.dto.workflow.WorkflowStartDTO;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Tag(name = "Workflow", description = "工作流审批接口")
 @RestController
@@ -46,6 +49,14 @@ public class WorkflowGatewayController {
     @PostMapping("/tasks/pending/query")
     public Result<PageResult<WorkflowTaskDTO>> getPendingTasks(@RequestBody WorkflowTaskQueryDTO query) {
         return workflowApi.getPendingTasks(query);
+    }
+
+    @Operation(summary = "按活动ID查询审批记录")
+    @GetMapping("/campaigns/{campaignId}/approval-records")
+    public Result<List<ApprovalRecordDTO>> getApprovalRecordsByCampaignId(
+            @Parameter(description = "活动ID", required = true)
+            @PathVariable("campaignId") Long campaignId) {
+        return workflowApi.getApprovalRecordsByCampaignId(campaignId);
     }
 
     @Operation(summary = "按业务键查询流程状态")

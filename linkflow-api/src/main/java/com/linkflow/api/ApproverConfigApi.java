@@ -24,6 +24,11 @@ public interface ApproverConfigApi {
     Result<List<ApproverDTO>> getApproverByTypeAndLevel(String campaignType, Integer level);
 
     /**
+     * 根据审批人用户 ID 查询审批配置
+     */
+    Result<List<ApproverDTO>> getApproverByUserId(Long approverId);
+
+    /**
      * 配置审批人
      */
     Result<Long> configApprover(ApproverDTO dto);

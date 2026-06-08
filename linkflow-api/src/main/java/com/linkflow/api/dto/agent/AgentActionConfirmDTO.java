@@ -15,5 +15,7 @@ public class AgentActionConfirmDTO implements Serializable {
 
     private String resultText;
 
+    private String actionType;
+
     private Long campaignId;
 }

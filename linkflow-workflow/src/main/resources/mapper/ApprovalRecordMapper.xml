@@ -44,6 +44,14 @@
         FROM approval_record
     </select>
 
+    <select id="selectByCampaignId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT id, campaign_id, process_instance_id, task_id, task_name,
+               approver_id, approver_name, action, comment, reject_reason, approve_time, create_time
+        FROM approval_record
+        WHERE campaign_id = #{campaignId,jdbcType=BIGINT}
+        ORDER BY approve_time ASC, create_time ASC, id ASC
+    </select>
+
     <update id="updateByPrimaryKey" parameterType="com.linkflow.workflow.model.ApprovalRecord">
         UPDATE approval_record
         SET campaign_id = #{campaignId,jdbcType=BIGINT},

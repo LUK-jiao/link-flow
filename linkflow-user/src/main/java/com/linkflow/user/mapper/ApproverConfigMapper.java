@@ -23,4 +23,9 @@ public interface ApproverConfigMapper {
      */
     List<ApproverConfig> selectByTypeAndLevel(@Param("campaignType") String campaignType,
                                               @Param("approverLevel") Integer level);
+
+    /**
+     * 根据审批人用户 ID 查询
+     */
+    List<ApproverConfig> selectByApproverId(@Param("approverId") Long approverId);
 }

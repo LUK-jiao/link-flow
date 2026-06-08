@@ -4,6 +4,7 @@ import com.linkflow.api.dto.campaign.CampaignCreateDTO;
 import com.linkflow.api.dto.campaign.CampaignDTO;
 import com.linkflow.api.dto.campaign.CampaignQueryDTO;
 import com.linkflow.api.dto.campaign.CampaignStatusUpdateDTO;
+import com.linkflow.api.dto.campaign.CampaignVisibleQueryDTO;
 import com.linkflow.api.dto.common.PageResult;
 import com.linkflow.api.dto.common.Result;
 
@@ -26,6 +27,11 @@ public interface CampaignApi {
      * 查询活动列表
      */
     Result<PageResult<CampaignDTO>> getCampaignList(CampaignQueryDTO query);
+
+    /**
+     * 查询当前用户可见活动列表
+     */
+    Result<PageResult<CampaignDTO>> getVisibleCampaignList(CampaignVisibleQueryDTO query);
 
     /**
      * 提交审批

@@ -16,6 +16,7 @@ import com.linkflow.api.dto.common.Result;
 import com.linkflow.api.dto.user.UserLoginDTO;
 import com.linkflow.api.dto.user.UserLoginResultDTO;
 import com.linkflow.api.dto.workflow.ApprovalRequestDTO;
+import com.linkflow.api.dto.workflow.ApprovalRecordDTO;
 import com.linkflow.api.dto.user.UserCreateDTO;
 import com.linkflow.api.dto.user.UserDTO;
 import com.linkflow.gateway.auth.JwtTokenService;
@@ -133,6 +134,29 @@ class GatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.code").isEqualTo(200)
                 .jsonPath("$.message").isEqualTo("success");
+    }
+
+    @Test
+    void approvalRecords_shouldPassThroughWorkflowApi() {
+        ApprovalRecordDTO record = new ApprovalRecordDTO();
+        record.setId(1L);
+        record.setCampaignId(1001L);
+        record.setTaskName("一级审批");
+        record.setApproverId(7L);
+        record.setAction("approve");
+        record.setComment("ok");
+        when(workflowApi.getApprovalRecordsByCampaignId(1001L)).thenReturn(Result.success(List.of(record)));
+
+        webTestClient.get()
+                .uri("/api/workflows/campaigns/1001/approval-records")
+                .headers(headers -> headers.setBearerAuth(testToken()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.code").isEqualTo(200)
+                .jsonPath("$.data[0].campaignId").isEqualTo(1001)
+                .jsonPath("$.data[0].taskName").isEqualTo("一级审批")
+                .jsonPath("$.data[0].action").isEqualTo("approve");
     }
 
     @Test
